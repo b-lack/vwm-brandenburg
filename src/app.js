@@ -5,6 +5,11 @@ import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
 import {H3HexagonLayer} from '@deck.gl/geo-layers';
 import DeckGL from '@deck.gl/react';
+import {TileLayer} from '@deck.gl/geo-layers';
+import {BitmapLayer, PathLayer, PolygonLayer} from '@deck.gl/layers';
+
+import css from "./css/ge.css";
+
 
 // Source data CSV
 //const DATA_URL = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/sf.h3cells.json'; // eslint-disable-line
@@ -35,6 +40,36 @@ const material = {
   shininess: 32,
   specularColor: [51, 51, 51]
 };
+const CONTROLLER = {
+  doubleClickZoom: true,
+  dragPan: false
+};
+const MASK_JSON = [
+  {
+    contour: [
+      [
+        11.854248046875,
+        51.00684227163969
+      ],
+      [
+        14.578857421875,
+        51.00684227163969
+      ],
+      [
+        14.578857421875,
+        53.50765128545441
+      ],
+      [
+        11.854248046875,
+        53.50765128545441
+      ],
+      [
+        11.854248046875,
+        51.00684227163969
+      ]
+    ]
+  }
+];
 
 const INITIAL_VIEW_STATE = {
   longitude: 13.015833,
@@ -44,6 +79,20 @@ const INITIAL_VIEW_STATE = {
   maxZoom: 15,
   pitch: 40.5,
   bearing: 0
+};
+
+const COPYRIGHT_LICENSE_STYLE = {
+  position: 'absolute',
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'hsla(0,0%,100%,.5)',
+  padding: '0 5px',
+  font: '12px/20px Helvetica Neue,Arial,Helvetica,sans-serif'
+};
+const LINK_STYLE = {
+  textDecoration: 'none',
+  color: 'rgba(0,0,0,.75)',
+  cursor: 'grab'
 };
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json';
@@ -78,11 +127,72 @@ function getTooltip({object}) {
 export default function App({
   data,
   mapStyle = MAP_STYLE,
+  outline = MASK_JSON,
   radius = 1100,
   upperPercentile = 100,
-  coverage = 0.9
+  coverage = 0.9,
+  onTilesLoad = null,
+  showBorder = null
 }) {
   const layers = [
+    new TileLayer({
+      // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
+      data: [
+        'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+      ],
+  
+      // Since these OSM tiles support HTTP/2, we can make many concurrent requests
+      // and we aren't limited by the browser to a certain number per domain.
+      maxRequests: 20,
+  
+      pickable: true,
+      onViewportLoad: onTilesLoad,
+      autoHighlight: showBorder,
+      highlightColor: [60, 60, 60, 40],
+      // https://wiki.openstreetmap.org/wiki/Zoom_levels
+      minZoom: 0,
+      maxZoom: 19,
+      tileSize: 256,
+      zoomOffset: devicePixelRatio === 1 ? -1 : 0,
+      renderSubLayers: props => {
+        const {
+          bbox: {west, south, east, north}
+        } = props.tile;
+  
+        return [
+          new BitmapLayer(props, {
+            data: null,
+            image: props.data,
+            bounds: [west, south, east, north]
+          }),
+          showBorder &&
+            new PathLayer({
+              id: `${props.id}-border`,
+              visible: props.visible,
+              data: [[[west, north], [west, south], [east, south], [east, north], [west, north]]],
+              getPath: d => d,
+              getColor: [255, 0, 0],
+              widthMinPixels: 4
+            })
+        ];
+      }
+    }),
+    new PolygonLayer({
+      id: 'polygon-layer',
+      data: outline,
+      pickable: false,
+      stroked: true,
+      filled: false,
+      wireframe: true,
+      lineWidthMinPixels: 1,
+      getPolygon: d => d.contour,
+      //getElevation: d => 0,
+      //getFillColor: d => [d.population / d.area / 60, 140, 0],
+      getLineColor: [80, 80, 80],
+      getLineWidth: 1
+    }),
     new H3HexagonLayer({
         id: 'h3-hexagon-layer',
         coverage,
@@ -120,10 +230,15 @@ export default function App({
       layers={layers}
       effects={[lightingEffect]}
       initialViewState={INITIAL_VIEW_STATE}
-      controller={true}
+      controller={CONTROLLER}
       getTooltip={getTooltip}
     >
-      <StaticMap reuseMaps mapStyle={mapStyle} preventStyleDiffing={true} />
+      <div style={COPYRIGHT_LICENSE_STYLE}>
+        {'© '}
+        <a style={LINK_STYLE} href="http://www.openstreetmap.org/copyright" target="blank">
+          OpenStreetMap contributors
+        </a>
+      </div>
     </DeckGL>
   );
 }

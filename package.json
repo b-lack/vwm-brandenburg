@@ -31,12 +31,14 @@
     "deck.gl": "^8.5.0",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
-    "react-map-gl": "^5.0.0"
+    "react-map-gl": "^5.0.0",
+    "style-loader": "^3.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.4.0",
     "@babel/preset-react": "^7.0.0",
     "babel-loader": "^8.0.5",
+    "css-loader": "^6.3.0",
     "h3-js": "^3.7.2",
     "html-webpack-plugin": "^4.5.2",
     "webpack": "^4.46.0",

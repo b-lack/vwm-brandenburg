@@ -15,3 +15,12 @@ npm start
 ### Data format
 
 ### Basemap
+
+Geodaten Landesgrenzen
+Landesvermessung und Geobasisinformation Brandenburg (LGB)
+https://geobasis-bb.de/
+
+Datenbasis
+
+https://github.com/NicolaiMogensen/Inverse-Distance-Weighting-JS
+
