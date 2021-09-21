@@ -8,7 +8,10 @@ Darstellung von Verjüngungszustands- und Wildeinflussmonitoring.
 npm install
 # or
 yarn
-# bundle and serve the app with webpack
+# bundle and serve the app
+npm dev
+
+# bundle and build the app
 npm start
 ```
 
