@@ -17,7 +17,7 @@
             .ge-center{position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);}
         </style>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="../dist/bundle.iife.css" rel="stylesheet">
+        <link href="https://raw.githubusercontent.com/b-lack/vwm-brandenburg/main/dist/bundle.iife.css" rel="stylesheet">
     </head>
     <body>
         <section>
@@ -54,25 +54,25 @@
             </div>
         </section>
     </body>
-    <script type="text/javascript" src="../dist/bundle.iife.js"></script>
+    <script type="text/javascript" src="https://raw.githubusercontent.com/b-lack/vwm-brandenburg/main/dist/bundle.iife.js"></script>
     <script type="text/javascript">
         var obj = new VWM();
         obj.addView('bb', {
             title: 'Brandenburg',
-            outlines: '../data/geo/land_small.geojson',
+            outlines: 'https://raw.githubusercontent.com/b-lack/vwm-brandenburg/main/data/geo/land_small.geojson',
             //data: '../data/h3/h3_6.json',
             dataLayer: [
-                {path: '../data/h3/h3_6.json', color: "#673ab7"},
-                {path: '../data/h3/h3_5.json', color: "#0f5a1f"}
+                {path: 'https://raw.githubusercontent.com/b-lack/vwm-brandenburg/main/data/h3/h3_6.json', color: "#673ab7"},
+                {path: 'https://raw.githubusercontent.com/b-lack/vwm-brandenburg/main/data/h3/h3_5.json', color: "#0f5a1f"}
             ]
         });
         obj.addView('tmp', {
             title: 'Temp',
-            outlines: '../data/geo/tmp.geojson',
+            outlines: 'https://raw.githubusercontent.com/b-lack/vwm-brandenburg/main/data/geo/tmp.geojson',
             //data: '../data/h3/h3_6.json',
             dataLayer: [
-                {path: '../data/h3/h3_6.json', color: "#673ab7"},
-                {path: '../data/h3/h3_5.json', color: "#0f5a1f"}
+                {path: 'https://raw.githubusercontent.com/b-lack/vwm-brandenburg/main/data/h3/h3_6.json', color: "#673ab7"},
+                {path: 'https://raw.githubusercontent.com/b-lack/vwm-brandenburg/main/data/h3/h3_5.json', color: "#0f5a1f"}
             ]
         });
         obj.changeView('bb');

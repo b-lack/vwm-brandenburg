@@ -19,13 +19,7 @@ export default [
                 format: 'umd',
                 name: 'VWM',
                 sourcemap: true
-            },
-            /*{
-                file: pkg.module,
-                format: 'cjs',
-                name: 'bbVwm',
-                sourcemap: true
-            }*/
+            }
         ],
         plugins: [
             css(),

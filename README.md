@@ -1,7 +1,8 @@
 # VWM-brandenburg
+
 Darstellung von Verjüngungszustands- und Wildeinflussmonitoring.
 
-### Usage
+## Usage
 
 ```bash
 # install dependencies
@@ -9,12 +10,8 @@ npm install
 # or
 yarn
 # bundle and serve the app
-npm dev
+npm run dev
 
 # bundle and build the app
-npm start
+npm run build
 ```
-
-### Data format
-
-### Basemap
