@@ -5,8 +5,8 @@
   "module": "dist/bundle.cjs.js",
   "description": "Darstellung von Verjüngungszustands- und Wildeinflussmonitoring",
   "scripts": {
-    "dev": "rm -rf dist && rollup -c -w",
-    "build": "rm -rf dist && rollup -c"
+    "dev": "rm -rf dist && rm -rf docs/dist && rollup -c -w",
+    "build": "rm -rf dist && rm -rf docs/dist && rollup -c"
   },
   "repository": {
     "type": "git",
