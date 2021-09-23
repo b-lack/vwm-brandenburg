@@ -1,8 +1,14 @@
 import L from 'leaflet';
 import './mask'
 //import {h3ToGeoBoundary} from "h3-js";
-import * as data from '../../../data/verbiss_ausw_fl_ba_2020_7_min.json';
-import * as outlines from '../../../data/land_small.json'; // FEHLER
+//import * as featureCollection from '../../../data/verbiss_ausw_fl_ba_2020_7_geo.json';
+
+//const featureCollection = require('../../../data/bb_7_geo.json')
+//const outlines = require('../../../data/land_small')
+
+//import featureCollection from './test.json';
+//import {featureCollection} from './bb_7_geo.json';
+//import {outlines} from '../../data/land_small.json'; // FEHLER
 
 
 function getColor(d) {
@@ -46,30 +52,14 @@ var map = L.map('ge-map', {
     maxBoundsViscosity: 1.0
 }).setView([52.459028, 13.015833], 7);
 
-var osm_mapnik = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 	maxZoom: 19,
 	attribution: '&copy; OSM Mapnik <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
 
 
-const featureCollection = {
-    type: "FeatureCollection",
-    features: []
-}
-for(var i in data){
-    const hexBoundary = h3ToGeoBoundary(i, true);
-    featureCollection.features.push({
-        type:"Feature",
-        geometry:{
-            type:"Polygon",
-            coordinates: [data[i].coordinates],
-        },
-        properties: {
-            avg: data[i].avg,
-        }
-    })
-}
+
 
 // Interaction
 function highlightFeature(e) {
@@ -101,7 +91,7 @@ function onEachFeature(feature, layer) {
 }
 
 // Legend
-var legend = L.control({position: 'bottomright'});
+/*var legend = L.control({position: 'bottomright'});
 
 legend.onAdd = function (map) {
 
@@ -118,31 +108,31 @@ legend.onAdd = function (map) {
     return div;
 };
 
-//legend.addTo(map);
+legend.addTo(map);*/
 
 var coordinates = outlines.features[0].geometry.coordinates[0][0];
 var latLngs = [];
-for (i=0; i<coordinates.length; i++) {
+for (let i=0; i<coordinates.length; i++) {
     latLngs.push(new L.LatLng(coordinates[i][1], coordinates[i][0]));
 }
 
 L.mask(latLngs).addTo(map);
 
 // Brandenburg
-var layerpoly = new L.geoJson(outlines.features, {
+var layerpoly = new L.geoJSON(outlines.features, {
     style: function(feature){
         return {
             color: "black",
             weight: 1,
             opacity: .4,
-            "fillColor": "white",
-            "fillOpacity": 0.5
+            fillColor: "white",
+            fillOpacity: 0.5
         };
     }
 }).addTo(map);
 
 // Berlin
-polygons = L.geoJson(
+L.geoJson(
     {
         type: "FeatureCollection",
         features: [
@@ -168,8 +158,8 @@ polygons = L.geoJson(
     }
 ).addTo(map);
 
-
-polygons = L.geoJson(
+// h3 GRid
+polygons = new L.geoJSON(
     featureCollection,
     {
         style: style,

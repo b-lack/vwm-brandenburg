@@ -1,8 +1,8 @@
-@import 'leaflet/dist/leaflet.css';
-
 #ge-map{
     max-width: 100%;
+    min-height: 400px;
     aspect-ratio: 1 / 1;
+    border: 1px solid #eee;
 }
 
 .info{

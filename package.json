@@ -1,10 +1,12 @@
 {
   "name": "vwm-brandenburg",
   "version": "1.0.0",
+  "main": "dist/bundle.iife.js",
+  "module": "dist/bundle.cjs.js",
   "description": "Darstellung von Verjüngungszustands- und Wildeinflussmonitoring",
   "scripts": {
-    "dev": "parcel ./src/*.html -d ./docs",
-    "build": "parcel build ./src/*.html -d ./docs"
+    "dev": "rm -rf dist && rollup -c -w",
+    "build": "rm -rf dist && rollup -c"
   },
   "repository": {
     "type": "git",
@@ -24,9 +26,25 @@
   "homepage": "https://github.com/b-lack/vwm-brandenburg#readme",
   "dependencies": {
     "h3-js": "^3.7.2",
-    "leaflet": "^1.7.1"
+    "leaflet": "^1.7.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "turf": "^3.0.14"
   },
   "devDependencies": {
-    "parcel-bundler": "^1.12.5"
+    "@rollup/plugin-babel": "^5.3.0",
+    "@rollup/plugin-commonjs": "^20.0.0",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.0.5",
+    "csv-parser": "^3.0.0",
+    "parcel-bundler": "^1.12.5",
+    "proj4": "^2.7.5",
+    "rollup-plugin-import-css": "^3.0.2",
+    "rollup-plugin-jsx": "^1.0.3",
+    "rollup-plugin-live-server": "^2.0.0",
+    "rollup-plugin-replace": "^2.2.0",
+    "rollup-plugin-serve": "^1.1.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup-plugin-watch": "^1.0.1"
   }
 }

@@ -1,4 +1,4 @@
-{
+export default Land = {
     "type": "FeatureCollection",
     "features": [
     {

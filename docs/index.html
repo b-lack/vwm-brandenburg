@@ -1,1 +1,105 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><title>VWM Brandenburg</title><style>body{margin:0;font-family:sans-serif;width:100vw;height:100vh;overflow:hidden}.bb-container{max-width:800px;margin:0 auto}.bb-map-wrapper{max-width:700px}</style><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/js.c875d7f7.css"></head><body> <div class="bb-container"> <div class="bb-map-wrapper"> <div id="ge-map"></div> </div> </div> </body><script type="text/javascript" src="/js.6a0f6eef.js"></script></html>
+<!doctype html>
+<html lang="de">
+    <head>
+        <meta charset="utf-8">
+        <title>VWM Brandenburg</title>
+        <link href="https://fonts.googleapis.com/css?family=Tangerine" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Cormorant+Garamond" rel="stylesheet">
+        <style>
+            h1{font-family: 'Tangerine', cursive; font-size: 2.5em; font-weight: normal;}
+            h2{font-family: 'Cormorant Garamond', cursive;  font-weight: normal;}
+            body {margin: 0; font-family: sans-serif; width: 100vw; font-family: 'Cormorant Garamond', serif;}
+            .bb-container{max-width: 800px; margin: 0 auto;}
+            .bb-map-wrapper{max-width: 700px;}
+            section{display:flex;align-items: stretch;flex-direction: row;text-align: center;}
+            section > *{flex-grow: 2;min-height: 300px;position: relative;}
+            .ge-padding{padding: 100px 0; overflow-y: scroll; position: relative;}
+            .ge-center{position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);}
+        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="../dist/bundle.iife.css" rel="stylesheet">
+    </head>
+    <body>
+        <section>
+            <div class="ge-padding">
+                <select id="laender" class="ge-center">
+                    <option value="bb">ganz Brandenburg</option>
+                    <option value="tmp">Test Entry</option>
+                </select>
+            </div>
+            <div class="ge-padding">
+                <h1>Select</h1>
+                <p>Auswahl der Landkreise</p>
+            </div>
+        </section>
+        <section>
+            <div class="ge-padding">
+                <div class="ge-center">
+                    <h1>Controls</h1>
+                    <p><button id="addBasemapBtn">Adds OpenStreetMap as Basemap</button></p>
+                    <p><button id="removeBasemapBtn">Removes Basemap</button></p>
+                    <p><button id="addMaskBtn">Add Mask</button></p>
+                    <p><button id="removeMaskBtn">Remove Mask</button></p>
+                </div>
+            </div>
+            <div><div id="ge-map"></div></div>
+        </section>
+        <section>
+            <div class="ge-padding">
+                <h1>Select</h1>
+                <p>Auswahl der aunzuzeigenden Variablen/Layer</p>
+            </div>
+            <div class="ge-padding">
+                <p class="ge-center"><button type="button" id="layer1">Layer 1</button> <button type="button" id="layer2">Layer 2</button></p>
+            </div>
+        </section>
+    </body>
+    <script type="text/javascript" src="../dist/bundle.iife.js"></script>
+    <script type="text/javascript">
+        var obj = new VWM();
+        obj.addView('bb', {
+            title: 'Brandenburg',
+            outlines: '../data/geo/land_small.geojson',
+            //data: '../data/h3/h3_6.json',
+            dataLayer: [
+                {path: '../data/h3/h3_6.json', color: "#673ab7"},
+                {path: '../data/h3/h3_5.json', color: "#0f5a1f"}
+            ]
+        });
+        obj.addView('tmp', {
+            title: 'Temp',
+            outlines: '../data/geo/tmp.geojson',
+            //data: '../data/h3/h3_6.json',
+            dataLayer: [
+                {path: '../data/h3/h3_6.json', color: "#673ab7"},
+                {path: '../data/h3/h3_5.json', color: "#0f5a1f"}
+            ]
+        });
+        obj.changeView('bb');
+
+        var mapObj = obj.addMap('ge-map', true)
+       
+        document.getElementById('layer1').addEventListener('click', function(event){
+            obj.changeLayer(0);
+        })
+        document.getElementById('layer2').addEventListener('click', function(event){
+            obj.changeLayer(1);
+        })
+        document.getElementById('laender').addEventListener('change', function(event){
+            console.log(event.target.value);
+            obj.changeView(event.target.value);
+        })
+        document.getElementById('addBasemapBtn').addEventListener('click', function(event){
+            mapObj.addBasemap();
+        })
+        document.getElementById('removeBasemapBtn').addEventListener('click', function(event){
+            mapObj.removeBasemap();
+        })
+        document.getElementById('addMaskBtn').addEventListener('click', function(event){
+            obj.addMask();
+        })
+        document.getElementById('removeMaskBtn').addEventListener('click', function(event){
+            obj.removeMask();
+        })
+    </script>
+</html>
