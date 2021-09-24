@@ -36,6 +36,7 @@
     "@rollup/plugin-commonjs": "^20.0.0",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.0.5",
+    "@turf/points-within-polygon": "^6.5.0",
     "csv-parser": "^3.0.0",
     "parcel-bundler": "^1.12.5",
     "proj4": "^2.7.5",

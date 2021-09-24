@@ -1,8 +1,9 @@
 import Map from '../map/map'
 
 class VWM{
-    constructor(dataPath = '../data/bb_7_geo.json') {
-        this.dataPath = dataPath;
+    constructor(dataObj = {}) {
+        //this.dataPath = dataPath;
+        this.dataObj = dataObj
         this.map = new Map();
         this.views = {}
         this.currentView = null
@@ -10,12 +11,56 @@ class VWM{
         this.currentLayerKey = null;
         this.currentViewKey = '';
         
-        //this.refreshData(this.dataPath);
+        this.toOverview();
+    }
+    toOverview(dataObj){
+        this.dataObj = dataObj || this.dataObj;
+        if(!this.dataObj.polygons){
+            console.error('polygons attribute is not defined');
+        }
         
+        //this.addJsonLayer(this.dataObj.polygons);
+        this._loadJson(this.dataObj.polygons).then(outlines => {
+            this.map.addParent(outlines, this.focusFeature.bind(this));
+        });
+
+        if(this.dataObj.mask){
+            this.getMaskLayer(this.dataObj.mask);
+        }
+    }
+    addJsonLayer(url){
+        this._loadJson(url).then(outlines => {
+            this.map.addObf(outlines, this.focusFeature.bind(this));
+        });
+    }
+    getMaskLayer(url){
+        this._loadJson(url).then(outlines => {
+            this.map.addMask(outlines.features[0].geometry.coordinates[0][0]);
+        });
+    }
+    getH3Layer(url){
+        this._loadJson(url).then(outlines => {
+            this.map.addPolygonsByH3(outlines.hexagons);
+        });
     }
     addView(name, view){
         this.views[name] = view;
     }
+    focusFeature(featureId, loadChild){
+        if(loadChild)
+        this.addJsonLayer('../data/geo/reviere/' + featureId + '.geojson'); // layer[0].polygons
+        this.getH3Layer('../data/h3/obf_clean/' + featureId +'_8.json'); // layer[0].h3
+        
+        /*const layer = this.dataObj.children.filter(obf => obf.id == featureId);
+        if(layer.length > 0){
+            this.addJsonLayer('../data/geo/reviere/' + featureId + '.geojson'); // layer[0].polygons
+            if(layer[0].h3){
+                this.getH3Layer('../data/h3/obf_clean/' + featureId +'_8.json'); // layer[0].h3
+            }
+               
+        }*/
+    }
+    
     changeView(name){
         if(!this.views[name] || this.currentViewKey === name) return false;
 
@@ -83,9 +128,10 @@ class VWM{
         this.addMask();
         this.map.addPolygonsByH3(this.currentView.jsonData);
     }*/
-    addMask(){
+    addMask(polygon){
         if(this.views[this.currentViewKey]){
-            this.map.addMask(this.views[this.currentViewKey].jsonOutlines.features[0].geometry.coordinates[0][0]);
+            this.map.addMask(polygon);
+            //this.map.addMask(this.views[this.currentViewKey].jsonOutlines.features[0].geometry.coordinates[0][0]);
         }
            
     }

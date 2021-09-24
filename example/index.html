@@ -56,7 +56,44 @@
     </body>
     <script type="text/javascript" src="../dist/bundle.iife.js"></script>
     <script type="text/javascript">
-        var obj = new VWM();
+        var schema = {
+            mask: '../data/geo/masks/land_small.geojson',
+            polygons: '../data/geo/obf.geojson',
+            children: [
+                {
+                    id: "1",
+                    //mask: '../data/geo/reviere/1.geojson',
+                    polygons: '../data/geo/reviere/1.geojson',
+                    h3: '../data/h3/obf_clean/1_8.json'
+                },
+                {
+                    id: "2",
+                    //mask: '../data/geo/reviere/2.geojson',
+                    polygons: '../data/geo/reviere/2.geojson',
+                    h3: '../data/h3/obf_clean/2_8.json'
+                },
+                {
+                    id: "3",
+                    //mask: '../data/geo/reviere/3.geojson',
+                    polygons: '../data/geo/reviere/3.geojson',
+                    h3: '../data/h3/obf_clean/3_8.json'
+                },
+                {
+                    id: "4",
+                    //mask: '../data/geo/reviere/3.geojson',
+                    polygons: '../data/geo/reviere/4.geojson',
+                    h3: '../data/h3/obf_clean/4_8.json'
+                },
+                {
+                    id: "4",
+                    //mask: '../data/geo/reviere/3.geojson',
+                    polygons: '../data/geo/reviere/4.geojson',
+                    h3: '../data/h3/obf_clean/4_8.json'
+                }
+            ]
+        }
+        var obj = new VWM(schema);
+
         obj.addView('bb', {
             title: 'Brandenburg',
             outlines: '../data/geo/land_small.geojson',
@@ -75,7 +112,8 @@
                 {path: '../data/h3/h3_5.json', color: "#0f5a1f"}
             ]
         });
-        obj.changeView('bb');
+        //obj.addJsonLayer();
+        //obj.changeView('bb');
 
         var mapObj = obj.addMap('ge-map', true)
        
@@ -86,7 +124,6 @@
             obj.changeLayer(1);
         })
         document.getElementById('laender').addEventListener('change', function(event){
-            console.log(event.target.value);
             obj.changeView(event.target.value);
         })
         document.getElementById('addBasemapBtn').addEventListener('click', function(event){
