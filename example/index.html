@@ -3,130 +3,46 @@
     <head>
         <meta charset="utf-8">
         <title>VWM Brandenburg</title>
-        <link href="https://fonts.googleapis.com/css?family=Tangerine" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/css?family=Cormorant+Garamond" rel="stylesheet">
-        <style>
-            h1{font-family: 'Tangerine', cursive; font-size: 2.5em; font-weight: normal;}
-            h2{font-family: 'Cormorant Garamond', cursive;  font-weight: normal;}
-            body {margin: 0; font-family: sans-serif; width: 100vw; font-family: 'Cormorant Garamond', serif;}
-            .bb-container{max-width: 800px; margin: 0 auto;}
-            .bb-map-wrapper{max-width: 700px;}
-            section{display:flex;align-items: stretch;flex-direction: row;text-align: center;}
-            section > *{flex-grow: 2;min-height: 300px;position: relative;}
-            .ge-padding{padding: 100px 0; overflow-y: scroll; position: relative;}
-            .ge-center{position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);}
-        </style>
+        <meta name="description" content="Darstellung von Verjüngungszustands- und Wildeinflussmonitoring">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="../dist/bundle.iife.css" rel="stylesheet" crossorigin="anonymous">
+        <link href="./dist/bundle.iife.css" rel="stylesheet">
+        <link rel="manifest" href="manifest.json">
+        <meta name="theme-color" content="#00613A">
+        <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+
     </head>
     <body>
         <section>
-            <div class="ge-padding">
-                <select id="laender" class="ge-center">
-                    <option value="bb">ganz Brandenburg</option>
-                    <option value="tmp">Test Entry</option>
-                </select>
-            </div>
-            <div class="ge-padding">
-                <h1>Select</h1>
-                <p>Auswahl der Landkreise</p>
-            </div>
-        </section>
-        <section>
-            <div class="ge-padding">
-                <div class="ge-center">
-                    <h1>Controls</h1>
-                    <p><button id="addBasemapBtn">Adds OpenStreetMap as Basemap</button></p>
-                    <p><button id="removeBasemapBtn">Removes Basemap</button></p>
-                    <p><button id="addMaskBtn">Add Mask</button></p>
-                    <p><button id="removeMaskBtn">Remove Mask</button></p>
+            <div id="ge-sidebar">
+                <div class="ge-side-header">
+                    <img height="80px" src="images/LFB Logo lang PNG.png" title="Logo Landesbetrieb Forst Brandenburg" alt="Logo Landesbetrieb Forst Brandenburg">
+                </div>
+                <div class="ge-side-content ge-grow">
+                    <p>
+                        <span id="selectedObf"></span>
+                        <span id="selectedRevier"></span>
+                    </p>
+                </div>
+                <div class="ge-side-footer">
+                    <a href="https://forst.brandenburg.de/lfb/de/impressum/" target="_blank">Impressum</a>
+                    <a href="https://forst.brandenburg.de/lfb/de/datenschutz/" target="_blank">Datenschutz</a>
                 </div>
             </div>
-            <div><div id="ge-map"></div></div>
+            <div id="ge-map"></div>
         </section>
-        <section>
-            <div class="ge-padding">
-                <h1>Select</h1>
-                <p>Auswahl der aunzuzeigenden Variablen/Layer</p>
-            </div>
-            <div class="ge-padding">
-                <p class="ge-center"><button type="button" id="layer1">Layer 1</button> <button type="button" id="layer2">Layer 2</button></p>
-            </div>
-        </section>
+        
     </body>
-    <script type="text/javascript" src="../dist/bundle.iife.js"></script>
+    <script type="text/javascript" src="./dist/bundle.iife.js"></script>
     <script type="text/javascript">
         var schema = {
-            mask: '../data/geo/masks/land_small.geojson',
-            polygons: '../data/geo/obf.geojson',
-            children: [
-                {
-                    id: "1",
-                    //mask: '../data/geo/reviere/1.geojson',
-                    polygons: '../data/geo/reviere/1.geojson',
-                    h3: '../data/h3/obf_clean/1_8.json'
-                },
-                {
-                    id: "2",
-                    //mask: '../data/geo/reviere/2.geojson',
-                    polygons: '../data/geo/reviere/2.geojson',
-                    h3: '../data/h3/obf_clean/2_8.json'
-                },
-                {
-                    id: "3",
-                    //mask: '../data/geo/reviere/3.geojson',
-                    polygons: '../data/geo/reviere/3.geojson',
-                    h3: '../data/h3/obf_clean/3_8.json'
-                },
-                {
-                    id: "4",
-                    //mask: '../data/geo/reviere/3.geojson',
-                    polygons: '../data/geo/reviere/4.geojson',
-                    h3: '../data/h3/obf_clean/4_8.json'
-                },
-                {
-                    id: "4",
-                    //mask: '../data/geo/reviere/3.geojson',
-                    polygons: '../data/geo/reviere/4.geojson',
-                    h3: '../data/h3/obf_clean/4_8.json'
-                }
-            ]
+            mask: './data/geo/masks/land_small.geojson',
+            polygons: './data/geo/obf.geojson'
         }
         var obj = new VWM(schema);
 
-        obj.addView('bb', {
-            title: 'Brandenburg',
-            outlines: '../data/geo/land_small.geojson',
-            //data: '../data/h3/h3_6.json',
-            dataLayer: [
-                {path: '../data/h3/h3_6.json', color: "#673ab7"},
-                {path: '../data/h3/h3_5.json', color: "#0f5a1f"}
-            ]
-        });
-        obj.addView('tmp', {
-            title: 'Temp',
-            outlines: '../data/geo/tmp.geojson',
-            //data: '../data/h3/h3_6.json',
-            dataLayer: [
-                {path: '../data/h3/h3_6.json', color: "#673ab7"},
-                {path: '../data/h3/h3_5.json', color: "#0f5a1f"}
-            ]
-        });
-        //obj.addJsonLayer();
-        //obj.changeView('bb');
-
         var mapObj = obj.addMap('ge-map', true)
        
-        document.getElementById('layer1').addEventListener('click', function(event){
-            obj.changeLayer(0);
-        })
-        document.getElementById('layer2').addEventListener('click', function(event){
-            obj.changeLayer(1);
-        })
-        document.getElementById('laender').addEventListener('change', function(event){
-            obj.changeView(event.target.value);
-        })
-        document.getElementById('addBasemapBtn').addEventListener('click', function(event){
+        /*document.getElementById('addBasemapBtn').addEventListener('click', function(event){
             mapObj.addBasemap();
         })
         document.getElementById('removeBasemapBtn').addEventListener('click', function(event){
@@ -137,6 +53,6 @@
         })
         document.getElementById('removeMaskBtn').addEventListener('click', function(event){
             obj.removeMask();
-        })
+        })*/
     </script>
 </html>

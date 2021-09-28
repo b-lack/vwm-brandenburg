@@ -1,6 +1,8 @@
 /*
-    example 
-    node processing/geo-json-feature-to-h3.js --featureFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/oberfoerstereien.geojson --resolution 8
+    examples
+    node processing/h3-on-forest.js --featureFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/waldflaechen_puffer_75m.geojson --resolution 9
+    node processing/h3-on-forest.js --featureFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/waldflaechen_puffer_75m.geojson --resolution 8
+    node processing/h3-on-forest.js --featureFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/waldflaechen_puffer_75m.geojson --resolution 10
 */
 
 const proj4 = require('proj4')
@@ -20,11 +22,18 @@ if(typeof argv.resolution === "undefined") {
 }else{
     RESOLUTION = argv.resolution;
 }
+if(typeof argv.featureFile === "undefined") {
+    console.warn('"--featureFile" attribute missing');
+    process.exit(1);
+}else{
+    FEATURCOLLECTIONFILE = argv.featureFile;
+}
 
 const PATHTOSAVE = __dirname +'/tmp/bb/';
+const OUTPUTFILENAME = 'h3_on_forest_' + RESOLUTION + '.json';
 let H3LIST = [];
 
-const forestdata = fs.readFileSync('/Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/waldflaechen_puffer_75m_siml.geojsonl.json');
+const forestdata = fs.readFileSync(FEATURCOLLECTIONFILE);
 const featureForest = JSON.parse(forestdata);
 
 async function coordinateToJson(coordinate){
@@ -39,20 +48,21 @@ async function parseFeatureCollection(coordinates){
     }
 
     
-    fs.writeFile(PATHTOSAVE + 'h3_on_forest_' + RESOLUTION + '.json', JSON.stringify(H3LIST), function (err) {
+    fs.writeFile(PATHTOSAVE + OUTPUTFILENAME, JSON.stringify(H3LIST), function (err) {
         if (err) return console.log(err);
-        console.log('written file:',  PATHTOSAVE + 'h3_on_forest_' + RESOLUTION + '.json');
+        console.log('written file:',  PATHTOSAVE + OUTPUTFILENAME);
     });
 }
 
-if (fs.existsSync(PATHTOSAVE)){
-    fs.rmdirSync(PATHTOSAVE, { recursive: true });
+if (fs.existsSync(PATHTOSAVE + OUTPUTFILENAME)){
+    fs.unlink(PATHTOSAVE + OUTPUTFILENAME)
+    //fs.rmdirSync(PATHTOSAVE, { recursive: true });
 }
 if (!fs.existsSync(PATHTOSAVE)){
     fs.mkdirSync(PATHTOSAVE, { recursive: true });
 }
 
-
+// MultiPolygon
 parseFeatureCollection(featureForest.geometry.coordinates);
 
 

@@ -3,7 +3,8 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet'
 import './mask'
 import {h3ToGeoBoundary} from "h3-js";
-//import {centroid, polygon, bbox} from 'turf';
+
+
 
 const BOUNDS = new L.LatLngBounds(new L.LatLng(51.00684227163969, 11.854248046875), new L.LatLng(53.50765128545441, 14.578857421875));
 
@@ -24,13 +25,13 @@ export default class {
     }
     init(elementId = 'ge-map', basemap = true){
         this.map = new L.map(this.elementId, {
-            minZoom: 0,
-            maxZoom: 17,
+            minZoom: 7,
+            maxZoom: 14,
             zoomControl: false,
-            dragging: false,
-            scrollWheelZoom: false,
-            doubleClickZoom: false
-            //maxBounds: BOUNDS,
+            dragging: true,
+            //scrollWheelZoom: false,
+            doubleClickZoom: false,
+            maxBounds: BOUNDS,
             //maxBoundsViscosity: 1.0,
 
         }).setView([52.459028, 13.015833], 7);
@@ -77,6 +78,24 @@ export default class {
         if(this.maskLayer){
             this.map.removeLayer(this.maskLayer)
             this.maskLayer = null;
+        }
+            
+    }
+    addRevierMask(coordinates){
+        this.removeRevierMask();
+
+        var latLngs = [];
+
+        for (let i=0; i<coordinates.length; i++) {
+            latLngs.push(new L.LatLng(coordinates[i][1], coordinates[i][0]));
+        }
+
+        this.maskRevierLayer = L.mask(latLngs).addTo(this.map);
+    }
+    removeRevierMask(){
+        if(this.maskRevierLayer){
+            this.map.removeLayer(this.maskRevierLayer)
+            this.maskRevierLayer = null;
         }
             
     }
@@ -157,8 +176,52 @@ export default class {
         this.map.removeLayer(this.parentLayer)
         this.parentLayer = null;
     }
-    addObf(featureCollection, callback){
+    /*addInterpolation(mask, resolution, propertie){ // geht nicht, weil nicht NUR WALD
+        var bbox = turf.bbox(mask);
+        console.log(bbox);
+        var points = turf.randomPoint(30, {bbox: bbox});
+
+        // add a random property to each point
+        turf.featureEach(points, function(point) {
+            point.properties[propertie] = Math.round(Math.random() * 100);
+        });
+        var options = {gridType: 'hex', property: propertie, units: 'kilometers'};
+        var grid = turf.interpolate(points, resolution, options);
+
         const that = this;
+        this.removeInterpolation();
+
+        //var ptsWithin = turf.pointsWithinPolygon(grid, mask);
+
+        this.interpolationLayer = L.geoJson(
+            grid,
+            {
+                style: function(feature){
+                    return {
+                        fillColor: numberToColorRgb(100-feature.properties[propertie], true, false, true),
+                        weight: 1,
+                        opacity: .8,
+                        color: '#000000',
+                        dashArray: '',
+                        fillOpacity: feature.properties[propertie]/100
+                    };
+                }
+            }
+        ).bindTooltip(function (layer) {
+            return '<bold>' + Math.round(layer.feature.properties[propertie]) + ' % </bold>';
+        }).addTo(this.map).setZIndex(100).bringToFront();
+
+        this.map.fitBounds(this.interpolationLayer.getBounds());
+    }
+    removeInterpolation(){
+        if(!this.interpolationLayer) return false;
+        this.map.removeLayer(this.interpolationLayer)
+        this.interpolationLayer = null;
+    }*/
+    addObf(featureCollection, callback){ // REVIERE
+        const that = this;
+        this.curRevier = null;
+        this.removeParent();
         this.removeObf();
         this.obfLayer = L.geoJson(
             featureCollection,
@@ -166,9 +229,9 @@ export default class {
                 style: function(feature){
                     return {
                         //fillColor: '#333333', //numberToColorRgb(100-feature.properties.avg, true, false, true),
-                        weight: 2,
+                        weight: 1,
                         opacity: .6,
-                        color: '#00613A',
+                        color: '#000000',
                         dashArray: '',
                         fillOpacity: 0
                     };
@@ -176,17 +239,19 @@ export default class {
                 onEachFeature:function(feature, layer){
                     layer.on({
                         click: e => {
-                            callback(feature.properties.obf, false);
+                            callback(feature.properties.fid, false);
                             console.log('click');
+                            that.curRevier = feature.properties.fid;
                             that.map.fitBounds(layer.getBounds());
                         }
                     });
                 }
             }
         ).bindTooltip(function (layer) {
+            if(that.curRevier === layer.feature.properties.fid) return false;
             return '<bold>' + layer.feature.properties.name + '</bold>';
         }).addTo(this.map).setZIndex(20);
-        console.log('obf');
+
         this.map.fitBounds(this.obfLayer.getBounds());
     }
     removeObf(){

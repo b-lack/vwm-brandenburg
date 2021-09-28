@@ -1,4 +1,5 @@
 /*
+    CREATE H3 LIST from GEOJSON
     example 
     node get-h3-center-bb.js --inputFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/verbiss_ausw_fl_ba_2020.csv
 */
@@ -9,10 +10,6 @@ const csv = require('csv-parser');
 const fs = require('fs');
 
 var argv = require('minimist')(process.argv.slice(2));
-
-
-
-
 
 if(typeof argv.resolution === "undefined") {
     console.warn('"--resolution" attribute missing');

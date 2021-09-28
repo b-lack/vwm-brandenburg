@@ -3,6 +3,8 @@ import Map from '../map/map'
 class VWM{
     constructor(dataObj = {}) {
         //this.dataPath = dataPath;
+        this.selectedObf = null;
+        this.selectedRevier = null;
         this.dataObj = dataObj
         this.map = new Map();
         this.views = {}
@@ -21,16 +23,18 @@ class VWM{
         
         //this.addJsonLayer(this.dataObj.polygons);
         this._loadJson(this.dataObj.polygons).then(outlines => {
-            this.map.addParent(outlines, this.focusFeature.bind(this));
+            this.map.addParent(outlines, this.focusLand.bind(this));
         });
 
         if(this.dataObj.mask){
             this.getMaskLayer(this.dataObj.mask);
         }
+
+        
     }
     addJsonLayer(url){
         this._loadJson(url).then(outlines => {
-            this.map.addObf(outlines, this.focusFeature.bind(this));
+            this.map.addObf(outlines, this.focusObf.bind(this));
         });
     }
     getMaskLayer(url){
@@ -41,24 +45,35 @@ class VWM{
     getH3Layer(url){
         this._loadJson(url).then(outlines => {
             this.map.addPolygonsByH3(outlines.hexagons);
+        }).catch(e => {
+            console.log(e);
         });
     }
     addView(name, view){
         this.views[name] = view;
     }
-    focusFeature(featureId, loadChild){
+    focusLand(featureId, loadChild){
         if(loadChild)
-        this.addJsonLayer('../data/geo/reviere/' + featureId + '.geojson'); // layer[0].polygons
-        this.getH3Layer('../data/h3/obf_clean/' + featureId +'_8.json'); // layer[0].h3
-        
-        /*const layer = this.dataObj.children.filter(obf => obf.id == featureId);
-        if(layer.length > 0){
             this.addJsonLayer('../data/geo/reviere/' + featureId + '.geojson'); // layer[0].polygons
-            if(layer[0].h3){
-                this.getH3Layer('../data/h3/obf_clean/' + featureId +'_8.json'); // layer[0].h3
-            }
-               
-        }*/
+        this.getH3Layer('../processing/tmp/obf_clean/' + featureId +'_8.json'); // layer[0].h3
+
+        this.setView(featureId, null);
+    }
+    focusObf(featureId, loadChild){
+        //if(loadChild)
+        //this.addJsonLayer('../processing/tmp/reviere/' + featureId + '.geojson'); // layer[0].polygons
+        this.getH3Layer('../processing/tmp/reviere_clean/10/fid_' + featureId +'_10.json'); // layer[0].h3
+        this.setView(this.selectedObf, featureId);
+    }
+    setView(selectedObf = null, selectedRevier = null){
+        this.selectedObf = selectedObf
+        this.selectedRevier = selectedRevier;
+        this.updateNavigation()
+    }
+    updateNavigation(){
+        console.log(this.selectedObf);
+        document.getElementById('selectedObf').innerText = this.selectedObf || '';
+        document.getElementById('selectedRevier').innerText = this.selectedRevier || '';
     }
     
     changeView(name){

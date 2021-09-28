@@ -16,7 +16,7 @@ let FEATURCOLLECTIONFILE;
 const DESTINATION = __dirname +'/../data/geo/reviere';
 
 if(typeof argv.featureFile === "undefined") {
-    console.warn('"--featureFile" attribute missing');
+    console.warn('"--featureFile" attribute missing');  
     process.exit(1);
 }else{
     FEATURCOLLECTIONFILE = argv.featureFile;
