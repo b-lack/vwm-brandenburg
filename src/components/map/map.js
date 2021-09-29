@@ -102,15 +102,16 @@ export default class {
     addPolygonsByH3(data, color = '#000000'){
         this.removePolygonsByH3();
         const features = [];
+        
         for( var i in data){
             features.push({
                 type:"Feature",
                 geometry:{
                     type:"Polygon",
-                    coordinates: [h3ToGeoBoundary(data[i], true)]
+                    coordinates: [h3ToGeoBoundary(data[i].hex10, true)]
                 },
                 properties: {
-                    avg: Math.random(),//data[i][1] || 0
+                    val: parseInt(data[i].val)/100,//data[i][1] || 0
                 }
             });
         }
@@ -122,17 +123,17 @@ export default class {
             {
                 style: function(feature){
                     return {
-                        fillColor: color, //numberToColorRgb(100-feature.properties.avg, true, false, true),
+                        fillColor: numberToColorRgb(100-(feature.properties.val*100), true, true, false),
                         weight: 1,
-                        opacity: .8,
-                        color: '#000000',
+                        opacity: .9,
+                        color: "#aaaaaa", //numberToColorRgb(100-(feature.properties.val*100), true, true, false),
                         dashArray: '',
-                        fillOpacity: feature.properties.avg
+                        fillOpacity: 1 //feature.properties.val
                     };
                 }
             }
         ).bindTooltip(function (layer) {
-            return '<h4>Terminalverbiss im oberen drittel</h4>' + Math.round(layer.feature.properties.avg*100) + ' %';
+            return '<h4>Terminalverbiss im oberen drittel</h4>' + Math.round(layer.feature.properties.val*100) + ' %';
         }).addTo(this.map).setZIndex(100).bringToFront();
     }
     removePolygonsByH3(){
@@ -165,10 +166,9 @@ export default class {
                     });
                 }
             }
-        ).bindTooltip(function (layer) {
+        )/*.bindTooltip(function (layer) {
             return '<bold>' + layer.feature.properties.name + '</bold>';
-        }).addTo(this.map).setZIndex(10);
-        console.log('new');
+        })*/.addTo(this.map).setZIndex(10);
         this.map.fitBounds(this.parentLayer.getBounds());
     }
     removeParent(){
@@ -230,7 +230,7 @@ export default class {
                     return {
                         //fillColor: '#333333', //numberToColorRgb(100-feature.properties.avg, true, false, true),
                         weight: 1,
-                        opacity: .6,
+                        opacity: .5,
                         color: '#000000',
                         dashArray: '',
                         fillOpacity: 0
@@ -247,10 +247,10 @@ export default class {
                     });
                 }
             }
-        ).bindTooltip(function (layer) {
+        )/*.bindTooltip(function (layer) {
             if(that.curRevier === layer.feature.properties.fid) return false;
             return '<bold>' + layer.feature.properties.name + '</bold>';
-        }).addTo(this.map).setZIndex(20);
+        })*/.addTo(this.map).setZIndex(20).bringToBack();
 
         this.map.fitBounds(this.obfLayer.getBounds());
     }

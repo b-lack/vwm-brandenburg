@@ -44,7 +44,7 @@ class VWM{
     }
     getH3Layer(url){
         this._loadJson(url).then(outlines => {
-            this.map.addPolygonsByH3(outlines.hexagons);
+            this.map.addPolygonsByH3(outlines);
         }).catch(e => {
             console.log(e);
         });
@@ -55,14 +55,14 @@ class VWM{
     focusLand(featureId, loadChild){
         if(loadChild)
             this.addJsonLayer('./data/geo/reviere/' + featureId + '.geojson'); // layer[0].polygons
-        this.getH3Layer('./data/h3/obf_clean/' + featureId +'_8.json'); // layer[0].h3
+        this.getH3Layer('./interpolation/8/' + featureId +'_8.json'); // layer[0].h3
 
         this.setView(featureId, null);
     }
     focusObf(featureId, loadChild){
         //if(loadChild)
         //this.addJsonLayer('../processing/tmp/reviere/' + featureId + '.geojson'); // layer[0].polygons
-        this.getH3Layer('./data/h3/reviere_clean/10/fid_' + featureId +'_10.json'); // layer[0].h3
+        this.getH3Layer('./interpolation/10/fid_' + featureId +'_10.json'); // layer[0].h3
         this.setView(this.selectedObf, featureId);
     }
     setView(selectedObf = null, selectedRevier = null){

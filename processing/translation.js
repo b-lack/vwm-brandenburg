@@ -2,6 +2,7 @@ const csv = require('csv-parser');
 const fs = require('fs');
 const proj4 = require('proj4')
 const h3 = require("h3-js");
+const { parse } = require('path');
 
 
 const projections = {
@@ -37,9 +38,9 @@ addLine = function(line, resolution = RESOLUTION){
     csvOutput += surveyPoint.join(',') + '\n'
 
     jsonOutput.push({
-        lat:latitude,
-        lon: longitude,
-        proz:line.Terminalv_zz__ob_1_3_zz_Altv_Proz,
+        x: latitude,
+        y: longitude,
+        val: parseFloat(line.Terminalv_zz__ob_1_3_zz_Altv_Proz),
         hex:hex
     })
 
@@ -95,20 +96,20 @@ avgObj = function(jsonObj, geojson = true){
 }
 
 writeFile = function(data){
-    fs.writeFile('./dist/h3_data_' + RESOLUTION +'.csv', data, function (err) {
+    fs.writeFile('tmp/survey-data/h3_data_' + RESOLUTION +'.csv', data, function (err) {
         if (err) return console.log(err);
         console.log('written file: ' + fileName + '_' + RESOLUTION + '.csv');
     });
-    /*fs.writeFile('../vwm-brandenburg/data/' + fileName + '_' + RESOLUTION + '.json', JSON.stringify(jsonOutput), function (err) {
+    fs.writeFile('tmp/survey-data/' + fileName + '_' + RESOLUTION + '.json', JSON.stringify(jsonOutput), function (err) {
         if (err) return console.log(err);
         console.log('written file: ' + fileName + '_' + RESOLUTION + '.json');
-    });*/
-    fs.writeFile('../data/' + fileName + '_' + RESOLUTION + '_geo.json', JSON.stringify(avgObj(jsonObj, true)), function (err) {
+    });
+    fs.writeFile('tmp/survey-data/' + fileName + '_' + RESOLUTION + '_geo.json', JSON.stringify(avgObj(jsonObj, true)), function (err) {
         if (err) return console.log(err);
         console.log('written file: ' + fileName + '_' + RESOLUTION + '_geo.json');
     });
 
-    fs.writeFile('../data/' + fileName + '_' + RESOLUTION + '_min.json', JSON.stringify(avgObj(jsonObj, false)), function (err) {
+    fs.writeFile('tmp/survey-data/' + fileName + '_' + RESOLUTION + '_min.json', JSON.stringify(avgObj(jsonObj, false)), function (err) {
         if (err) return console.log(err);
         console.log('written file: ' + fileName + '_' + RESOLUTION + '_min.json');
     });
