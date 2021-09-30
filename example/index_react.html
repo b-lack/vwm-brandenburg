@@ -32,34 +32,15 @@
                 </div>
             </div>
             <div id="ge-map">
-                <canvas id="ge-canvas"></canvas>
+                <div id="app"></div>
             </div>
         </section>
         
     </body>
     <script type="text/javascript" src="./dist/bundle.iife.js"></script>
     <script type="text/javascript">
-        var schema = {
-            mask: './data/geo/masks/land_small.geojson',
-            polygons: './data/geo/obf.geojson'
-        }
+    console.log(VWM, document.getElementById('app'));
+        console.log(VWM.renderToDOM(document.getElementById('app')));
         
-        var obj = new VWM(schema);
-
-        obj.addMap('ge-map', true)
-        obj.addBasemap();
-       
-        /*document.getElementById('addBasemapBtn').addEventListener('click', function(event){
-            mapObj.addBasemap();
-        })
-        document.getElementById('removeBasemapBtn').addEventListener('click', function(event){
-            mapObj.removeBasemap();
-        })
-        document.getElementById('addMaskBtn').addEventListener('click', function(event){
-            obj.addMask();
-        })
-        document.getElementById('removeMaskBtn').addEventListener('click', function(event){
-            obj.removeMask();
-        })*/
     </script>
 </html>
