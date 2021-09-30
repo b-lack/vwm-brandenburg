@@ -22,6 +22,7 @@ export default class {
         this.h3Data = []
         this.obfData = {}
         this.fid = null;
+        this.h3Resolutions = {}
     }
     init(){
         this.deckgl = new Deck({
@@ -212,16 +213,33 @@ export default class {
             this.layers.push(this.obfLayer);
         }
         this.deckgl.setProps({layers: this.layers})
+    }
+    getLayerById(id){
+        return this.layers.filter(elem => elem.id === id);
+    }
+    addPolygonsByH3(data, featureId, resolution){
+
+        for( var i in this.layers){
+            if(this.layers[i].id.startsWith('h3-hexagon-layer'))
+                this.layers[i] = this.layers[i].clone({visible: false})
+            if(this.layers[i].id === 'h3-hexagon-layer-' + featureId + '_' + resolution){
+                this.layers[i] = this.layers[i].clone({visible: true})
+            }
+        }
+
+        if(!this.h3Resolutions[featureId + '_' + resolution]){
+            
+            this.h3Resolutions[featureId + '_' + resolution] = true;
+
+            this.createPolygonsByH3(data, featureId, resolution);
+
+        }
 
     }
-    addPolygonsByH3(data){
-        //this.h3Data.push(...data);
-        this.createPolygonsByH3(data);
-        //console.log('Data:', this.h3Data.length, this.layers);
-    }
-    createPolygonsByH3(data){
+    createPolygonsByH3(data, featureId, resolution){
+        
         this.h3Layer = new H3HexagonLayer({
-            id: 'h3-hexagon-layer' + Math.random(),
+            id: 'h3-hexagon-layer-' + featureId + '_' + resolution,
             data: data,
             pickable: true,
             wireframe: false,
@@ -229,11 +247,12 @@ export default class {
             extruded: true,
             elevationScale: 50,
             coverage: 0.9,
-            visible: true,
-            getHexagon: d => d.hex,
+            visible: this.h3Resolutions[featureId + '_' + resolution],
+            getHexagon: d =>  d.hex || d.hex10,
             getFillColor: d => [( d.val / 100) * 255, (1 - d.val / 100) * 255, 0],
             getElevation: d => d.val
         });
+
         this.layers.push(this.h3Layer);
     }
     addMask(){

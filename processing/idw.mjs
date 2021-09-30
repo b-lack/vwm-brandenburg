@@ -1,12 +1,32 @@
+/*
+node processing/idw.mjs --resolution 8
+node processing/idw.mjs --resolution 9
+node processing/idw.mjs --resolution 10
+*/
+
 import * as turf from '@turf/turf'
 import fs from 'fs';
 import * as h3 from 'h3-js'
+import minimist from 'minimist'
+import { URL } from 'url';
+
+var argv = minimist(process.argv.slice(2));
+
+let RESOLUTION;
+
+if(typeof argv.resolution === "undefined") {
+    console.warn('"--resolution" attribute missing');
+    process.exit(1);
+}else{
+    RESOLUTION = argv.resolution;
+}
+
+const __dirname = new URL('./', import.meta.url).pathname;
 
 //https://github.com/NicolaiMogensen/Inverse-Distance-Weighting-JS/blob/master/idwJS.js
 
-//const SURVEYDIRECTORY = 'tmp/reviere_clean/10/';
-const SURVEYDIRECTORY = 'tmp/obf_clean/8/';
-const OUTPUTDIRECTORY = 'tmp/interpolation/8/';
+const SURVEYDIRECTORY = __dirname + 'tmp/resolutions_clean/' + RESOLUTION + '/';
+const OUTPUTDIRECTORY = __dirname + 'tmp/interpolation/' + RESOLUTION + '/';
 
 if (!fs.existsSync(OUTPUTDIRECTORY)){
     fs.mkdirSync(OUTPUTDIRECTORY, { recursive: true });
@@ -33,7 +53,7 @@ function calcDist(p, q) {
 
 
 // load meassured data
-const survey_points = fs.readFileSync('tmp/survey-data/verbiss_ausw_fl_ba_2020_7.json');
+const survey_points = fs.readFileSync(__dirname + 'tmp/survey-data/verbiss_ausw_fl_ba_2020_7.json');
 const surveyPointsObj = JSON.parse(survey_points);
 
 
@@ -58,12 +78,13 @@ function parseFile(file){
 }
 
 function walkDir(files){
+    
     for (const file of files) {
         const contents = parseFile(file);
     }
 }
 
-
+console.log(SURVEYDIRECTORY);
 fs.readdir(SURVEYDIRECTORY, (err, files) => {
     walkDir(files)
 });

@@ -1,6 +1,9 @@
 //import Map from '../map/map'
-import Map from '../deckgl/map'
 //import APP from '../react-map/map'
+
+import Map from '../deckgl/map'
+import * as obfObfDd from '../../geo-resolution/obf.json';
+import * as obfRevierDd from '../../geo-resolution/revier.json';
 
 class VWM{
     constructor(dataObj = {}) {
@@ -31,8 +34,52 @@ class VWM{
         if(this.dataObj.mask){
             this.getMaskLayer(this.dataObj.mask);
         }
+    }
+    createObfDropdown(elementId, childId){
+        const that = this;
+        const selectElement = document.createElement('SELECT');
+        let optionElement = document.createElement('OPTION');
+        optionElement.innerText = 'wählen ...';
+        optionElement.setAttribute("value", 0);
+        selectElement.append(optionElement);
 
-        
+        for(var i = 0; i < obfObfDd.default.length; i++){
+            let optionElement = document.createElement('OPTION');
+            optionElement.innerText = obfObfDd.default[i].properties.name;
+            optionElement.setAttribute("value", obfObfDd.default[i].properties.id);
+            selectElement.append(optionElement);
+        }
+
+        document.getElementById(elementId).append(selectElement);
+        selectElement.addEventListener('change', (e) => {
+            const newValue = e.target.options[e.target.selectedIndex].value;
+            that.focusLand(newValue);
+            that.createRevierDropdown(childId, newValue);
+        })
+    }
+    createRevierDropdown(elementId, parentId){
+
+        const filteredByParent = obfRevierDd.default.filter(elem => parseInt(elem.properties.parentId) === parseInt(parentId))
+
+        const that = this;
+        const selectElement = document.createElement('SELECT');
+        let optionElement = document.createElement('OPTION');
+        optionElement.innerText = 'wählen ...';
+        optionElement.setAttribute("value", 0);
+        selectElement.append(optionElement);
+
+        for(var i = 0; i < filteredByParent.length; i++){
+            let optionElement = document.createElement('OPTION');
+            optionElement.innerText = filteredByParent[i].properties.name;
+            optionElement.setAttribute("value", filteredByParent[i].properties.id);
+            selectElement.append(optionElement);
+        }
+
+        document.getElementById(elementId).innerHTML = '';
+        document.getElementById(elementId).append(selectElement);
+        selectElement.addEventListener('change', (e) => {
+            that.focusObf(e.target.options[e.target.selectedIndex].value);
+        })
     }
     addJsonLayer(url){
         this._loadJson(url).then(outlines => {
@@ -45,9 +92,9 @@ class VWM{
             this.map.createMaskLayer(outlines.features[0]);
         });
     }
-    getH3Layer(url){
+    getH3Layer(url, featureId, resolution){
         this._loadJson(url).then(outlines => {
-            this.map.addPolygonsByH3(outlines);
+            this.map.addPolygonsByH3(outlines, featureId, resolution);
         }).catch(e => {
             console.log(e);
         });
@@ -56,17 +103,17 @@ class VWM{
         this.views[name] = view;
     }
     focusLand(featureId, loadChild){
-        if(loadChild)
-            this.addJsonLayer('./data/geo/reviere/' + featureId + '.geojson'); // layer[0].polygons
-        this.getH3Layer('./interpolation/8/' + featureId +'_8.json'); // layer[0].h3
+        /*if(loadChild)
+            this.addJsonLayer('./data/geo/reviere/' + featureId + '.geojson');*/ // layer[0].polygons
+        this.getH3Layer('./interpolation/9/fid_' + featureId +'_9.json', featureId, 9); // layer[0].h3
 
-        this.setView(featureId, null);
+        //this.setView(featureId, null);
     }
     focusObf(featureId, loadChild){
         //if(loadChild)
         //this.addJsonLayer('../processing/tmp/reviere/' + featureId + '.geojson'); // layer[0].polygons
-        this.getH3Layer('./interpolation/10/fid_' + featureId +'_10.json'); // layer[0].h3
-        this.setView(this.selectedObf, featureId);
+        this.getH3Layer('./interpolation/10/fid_' + featureId +'_10.json', featureId, 10); // layer[0].h3
+        //this.setView(this.selectedObf, featureId);
     }
     setView(selectedObf = null, selectedRevier = null){
         this.selectedObf = selectedObf
@@ -171,9 +218,10 @@ class VWM{
         setTimeout(function(){
             that.getH3Layer('./interpolation/8/3_8.json');
         }, 2000)*/
-        for(var i=1; i<31; i++){
+        this.getH3Layer('./interpolation/8/fid_undefined_8.json', 'global', 8);
+        /*for(var i=1; i<31; i++){
             this.getH3Layer('./interpolation/8/'+i+'_8.json');
-        }
+        }*/
     }
     async _loadJson(url){
         const response = await fetch(url, {
