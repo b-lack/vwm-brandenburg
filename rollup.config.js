@@ -10,7 +10,7 @@ import replace from 'rollup-plugin-replace';
 
 
 
-const extensions = ['.js']
+const extensions = ['.js', '.jsx']
 export default [
     {
         input: 'src/index.js',
@@ -23,24 +23,28 @@ export default [
             }
         ],
         plugins: [
-            css(),
-            jsx( {factory: 'React.createElement'} ),
-            terser(),
-            json({
-                compact: true,
+            babel({
+                //plugins: ['transform-class-properties'],
+                //exclude: 'node_modules/**',
+                presets: ["@babel/preset-react"],
+                babelHelpers: 'bundled'
             }),
+            css(),
+            //jsx( {factory: 'React.createElement'} ),
+            terser(),
+            
             resolve({
                 browser: true
             }),
-            babel({
-                exclude: 'node_modules/**',
-                extensions,
-                babelHelpers: 'bundled'
-            }),
-            commonjs(),
+            
+            
             replace({
                 'process.env.NODE_ENV': JSON.stringify( 'development' )
-            })
+            }),
+            commonjs(),
+            json({
+                compact: true,
+            }),
         ]
     }
 ];

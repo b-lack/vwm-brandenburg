@@ -1,4 +1,6 @@
-import Map from '../map/map'
+//import Map from '../map/map'
+import Map from '../deckgl/map'
+//import APP from '../react-map/map'
 
 class VWM{
     constructor(dataObj = {}) {
@@ -39,7 +41,8 @@ class VWM{
     }
     getMaskLayer(url){
         this._loadJson(url).then(outlines => {
-            this.map.addMask(outlines.features[0].geometry.coordinates[0][0]);
+            //this.map.addMask(outlines); //.features[0].geometry.coordinates[0][0]
+            this.map.createMaskLayer(outlines.features[0]);
         });
     }
     getH3Layer(url){
@@ -145,7 +148,8 @@ class VWM{
     }*/
     addMask(polygon){
         if(this.views[this.currentViewKey]){
-            this.map.addMask(polygon);
+            //this.map.addMask(polygon);
+            this.map.createMaskLayer(polygon);
             //this.map.addMask(this.views[this.currentViewKey].jsonOutlines.features[0].geometry.coordinates[0][0]);
         }
            
@@ -157,7 +161,19 @@ class VWM{
         this.geoDataPath = geoDataPath;
         //this.refreshGeoData(this.geoDataPath);
         this.map.init(elementId, basemap);
+        
         return this.map;
+    }
+    addBasemap(){
+        const that = this;
+        //this.map.createBaseMap();
+        /*this.getH3Layer('./interpolation/8/1_8.json');
+        setTimeout(function(){
+            that.getH3Layer('./interpolation/8/3_8.json');
+        }, 2000)*/
+        for(var i=1; i<31; i++){
+            this.getH3Layer('./interpolation/8/'+i+'_8.json');
+        }
     }
     async _loadJson(url){
         const response = await fetch(url, {
