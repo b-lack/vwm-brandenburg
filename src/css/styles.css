@@ -4,7 +4,7 @@ body {
 }
 
 #ge-map, #ge-canvas{
-    max-width: 100%;
+    overflow: hidden;
     height: 100vh !important;
     aspect-ratio: 1 / 1;
     border-left: 1px solid #eee;
@@ -46,6 +46,10 @@ label{
 }
 .ge-grow{
     flex-grow: 3;
+}
+select{
+    border: none;
+    border-bottom: 1px solid #aaa;
 }
 section{display:flex; align-items: stretch; flex-direction: row;}
 
