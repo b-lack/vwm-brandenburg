@@ -1,8 +1,9 @@
 /*
     Creates H3 List per OBF
     example 
-    node processing/geo-json-feature-to-h3.js --featureFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/reviere.geojson --outputDir reviere --propertyId fid --resolution 9
-    node processing/geo-json-feature-to-h3.js --featureFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/oberfoerstereien.geojson --outputDir obf --propertyId fid --resolution 8
+    node processing/geo-json-feature-to-h3.js --featureFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/reviere.geojson --outputDir resolutions --propertyId fid --resolution 10
+    node processing/geo-json-feature-to-h3.js --featureFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/oberfoerstereien.geojson --outputDir resolutions --propertyId fid --resolution 9
+    node processing/geo-json-feature-to-h3.js --featureFile /Users/b-mac/sites/lfb/vwm-brandenburg/example/data/geo/masks/land_small.geojson --outputDir resolutions --propertyId fid --resolution 8
 */
 
 const proj4 = require('proj4')
@@ -73,8 +74,9 @@ async function featureToJson(element){
 
     return {
         properties: {
-            name: element.properties.name,
-            id: element.properties[PROPERTYID]
+            name: element.properties && element.properties.name,
+            id: element.properties && element.properties[PROPERTYID],
+            parentId: element.properties && parseInt(element.properties["obf"]),
         },
         hexagons: hexagons
     };
@@ -83,8 +85,8 @@ async function featureToJson(element){
 async function saveJsonToDist(name, data){
     var nameToSave = PROPERTYID + '_' + data.properties.id + '_' + RESOLUTION +'.json'
     OBFLIST.push({
-        filePath: PATHTOSAVE,
-        fileName:nameToSave,
+        //filePath: PATHTOSAVE,
+        //fileName:nameToSave,
         properties: data.properties
     });
     console.log('saving: ', PATHTOSAVE + nameToSave);

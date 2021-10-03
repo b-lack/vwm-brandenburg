@@ -1,15 +1,26 @@
-body {margin: 0;}
+body {
+    margin: 0;
+    font-family: Open Sans,Helvetica,Arial, sans-serif;
+}
 
 #ge-map, #ge-canvas{
-    max-width: 100%;
+    overflow: hidden;
     height: 100vh !important;
     aspect-ratio: 1 / 1;
     border-left: 1px solid #eee;
     left: 0;
     top:0;
 }
+.row{
+    display:flex;
+    justify-content: space-between;
+    flex-direction: row;
+}
+label{
+    font-size: 0.8em;
+}
 #ge-sidebar{
-    min-width: 300px;
+    max-width: 350px;
     display:flex;
     align-items: stretch;
     flex-direction: column;
@@ -35,6 +46,10 @@ body {margin: 0;}
 }
 .ge-grow{
     flex-grow: 3;
+}
+select{
+    border: none;
+    border-bottom: 1px solid #aaa;
 }
 section{display:flex; align-items: stretch; flex-direction: row;}
 

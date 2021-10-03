@@ -22,6 +22,8 @@ export default class {
         this.h3Data = []
         this.obfData = {}
         this.fid = null;
+        this.h3Resolutions = {}
+        this.maskLayers = {};
     }
     init(){
         this.deckgl = new Deck({
@@ -80,11 +82,44 @@ export default class {
         this.layers.push(this.baseMap);
         //this.deckgl.setProps({ layers: [...[this.baseMap]] });
     }
-    createMaskLayer(feature){
+    addMask(preId, data, featureId, resolution){
+
+        let found = false;
+
+        for( var i in this.layers){
+            if(this.layers[i].id.startsWith(preId) && this.layers[i].id !== 'mask-layer-0_8')
+                this.layers[i] = this.layers[i].clone({visible: false})
+
+            if(this.layers[i].id === preId + featureId + '_' + resolution){
+                this.layers[i] = this.layers[i].clone({visible: true})
+                found = true;
+            }
+        }
+
+        if(!found){
+            this.createMaskLayer(preId, data, featureId, resolution);
+        }
+    }
+    createMaskLayer(preId, data, featureId, resolution){
+        console.log(preId + featureId + '_' + resolution);
+        this.maskLayer = new GeoJsonLayer({
+            id: preId + featureId + '_' + resolution,
+            data: this.polyMask(data),
+            getFillColor: preId + featureId + '_' + resolution == 'mask-layer-0_8' ? [255,255,255,255] : [255,255,255,200],
+            stroked: false,
+            extruded: false,
+            wireframe: true,
+            lineJointRounded: true,
+        });
+        this.layers.push(this.maskLayer);
+        console.log('Mask created');
+        //this.deckgl.setProps({ layers: [...[this.maskLayer]] });
+        this.fitBounds(data);
+        /*
         console.log(this.maskLayer);
         if(this.maskLayer){
             this.maskLayer = new GeoJsonLayer({
-                id: 'mask-layer',
+                id: preId + featureId + '_' + resolution,
                 data: feature,
                 getFillColor: [160, 160, 180, 200],
                 stroked: false,
@@ -95,7 +130,7 @@ export default class {
             return;
         }else{
             this.maskLayer = new GeoJsonLayer({
-                id: 'mask-layer',
+                id: preId + featureId + '_' + resolution,
                 data: this.polyMask(feature),
                 getFillColor: [255,255,255,255],
                 stroked: false,
@@ -107,7 +142,7 @@ export default class {
             
             //this.deckgl.setProps({ layers: [...[this.maskLayer]] });
             this.fitBounds(feature);
-        }
+        }*/
     }
     polyMask = (isochrone) => {
         const bboxPoly = turf.bboxPolygon([-180, -85, 180, 85]);
@@ -123,9 +158,10 @@ export default class {
         ]);
         
         // Zoom to the object
-        //zoom = 14;
+        console.log(zoom);
+        zoom = 7;
         this.deckgl.setProps({
-            initialViewState: {longitude, latitude, zoom, minZoom: 6, maxZoom: 14}
+            initialViewState: {longitude, latitude, zoom, minZoom: 6, maxZoom: 14, bearing: 0, pitch: 0}
         });
         
     }
@@ -180,7 +216,6 @@ export default class {
             lineWidthMinPixels: 2 + Math.random(),
             getLineColor: [255,255,255,255],
             getFillColor: d => {
-                console.log('triggered:', d.properties.hover);
                 return d.properties.hover ? [255,255,255,0] : [255,255,255,10]
             },
             updateTriggers: {
@@ -212,16 +247,33 @@ export default class {
             this.layers.push(this.obfLayer);
         }
         this.deckgl.setProps({layers: this.layers})
+    }
+    /*getLayerById(id){
+        return this.layers.filter(elem => elem.id === id);
+    }*/
+    addPolygonsByH3(preId, data, featureId, resolution){
+
+        for( var i in this.layers){
+            if(this.layers[i].id.startsWith(preId))
+                this.layers[i] = this.layers[i].clone({visible: false})
+            if(this.layers[i].id === preId + featureId + '_' + resolution){
+                this.layers[i] = this.layers[i].clone({visible: true})
+            }
+        }
+
+        if(!this.h3Resolutions[featureId + '_' + resolution]){
+            
+            this.h3Resolutions[featureId + '_' + resolution] = true;
+
+            this.createPolygonsByH3(preId,data, featureId, resolution);
+
+        }
 
     }
-    addPolygonsByH3(data){
-        //this.h3Data.push(...data);
-        this.createPolygonsByH3(data);
-        //console.log('Data:', this.h3Data.length, this.layers);
-    }
-    createPolygonsByH3(data){
+    createPolygonsByH3(preId, data, featureId, resolution){
+        
         this.h3Layer = new H3HexagonLayer({
-            id: 'h3-hexagon-layer' + Math.random(),
+            id: preId + featureId + '_' + resolution,
             data: data,
             pickable: true,
             wireframe: false,
@@ -229,14 +281,12 @@ export default class {
             extruded: true,
             elevationScale: 50,
             coverage: 0.9,
-            visible: true,
-            getHexagon: d => d.hex,
+            visible: this.h3Resolutions[featureId + '_' + resolution],
+            getHexagon: d =>  d.hex || d.hex10,
             getFillColor: d => [( d.val / 100) * 255, (1 - d.val / 100) * 255, 0],
             getElevation: d => d.val
         });
-        this.layers.push(this.h3Layer);
-    }
-    addMask(){
 
+        this.layers.push(this.h3Layer);
     }
 }

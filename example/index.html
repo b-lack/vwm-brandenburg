@@ -18,10 +18,16 @@
                     <img height="80px" src="images/LFB Logo lang PNG.png" title="Logo Landesbetrieb Forst Brandenburg" alt="Logo Landesbetrieb Forst Brandenburg">
                 </div>
                 <div class="ge-side-content ge-grow">
-                    <p>
-                        <span id="selectedObf"></span>
-                        <span id="selectedRevier"></span>
-                    </p>
+                    <div class="row">
+                        <div>
+                            <label>Oberförsterei</label>
+                            <div id="ge-obf-selection-wrapper"></div>
+                        </div>
+                        <div>
+                            <label>Revier</label><br/>
+                            <div id="ge-revier-selection-wrapper"></div>
+                        </div>
+                    </div>
                 </div>
                 <div class="ge-side-footer">
                     <a href="https://forst.brandenburg.de/lfb/de/impressum/" target="_blank">Impressum</a>
@@ -40,26 +46,16 @@
     <script type="text/javascript" src="./dist/bundle.iife.js"></script>
     <script type="text/javascript">
         var schema = {
-            mask: './data/geo/masks/land_small.geojson',
-            polygons: './data/geo/obf.geojson'
+            mask: './geo/land.geojson',
+            polygons: './geo/obf.geojson'
         }
         
         var obj = new VWM(schema);
 
         obj.addMap('ge-map', true)
         obj.addBasemap();
+
+        obj.createObfDropdown('ge-obf-selection-wrapper', 'ge-revier-selection-wrapper');
        
-        /*document.getElementById('addBasemapBtn').addEventListener('click', function(event){
-            mapObj.addBasemap();
-        })
-        document.getElementById('removeBasemapBtn').addEventListener('click', function(event){
-            mapObj.removeBasemap();
-        })
-        document.getElementById('addMaskBtn').addEventListener('click', function(event){
-            obj.addMask();
-        })
-        document.getElementById('removeMaskBtn').addEventListener('click', function(event){
-            obj.removeMask();
-        })*/
     </script>
 </html>

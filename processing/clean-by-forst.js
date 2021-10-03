@@ -2,8 +2,9 @@
     Gets all Files in Dir: OBFFOLDER
     Cleans Data by h3_on_forest_8.json
     Saves to CLEAROBFFOLDER
-    node processing/clean-by-forst.js --outputDir reviere --resolution 9
-    node processing/clean-by-forst.js --outputDir reviere --resolution 10
+    node processing/clean-by-forst.js --outputDir resolutions --resolution 8
+    node processing/clean-by-forst.js --outputDir resolutions --resolution 9
+    node processing/clean-by-forst.js --outputDir resolutions --resolution 10
 */
 
 const fs = require('fs');
