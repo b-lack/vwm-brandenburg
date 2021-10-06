@@ -41,3 +41,7 @@ Calculates Inverse-Distance-Weighting from given coordinates/values and list of 
 ```bash
 node processing/idw.mjs --resolution 10
 ```
+## Credits
+
+Data provided by the Brandenburg State Forestry Office
+[Wildschäden erfassen und vorbeugen](https://forst.brandenburg.de/lfb/de/ueber-uns/landeskompetenzzentrum-lfe/wildschaeden-erfassen-und-vorbeugen/#)

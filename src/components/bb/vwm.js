@@ -5,17 +5,15 @@ import ReactApp from '../deckgl/react'
 
 import ReactDOM from 'react-dom';
 
-import Map from '../deckgl/map'
+//import Map from '../deckgl/map'
 import * as obfObfDd from '../../geo-resolution/obf.json';
 import * as obfRevierDd from '../../geo-resolution/reviere.json';
 
 class VWM{
-    constructor(dataObj = {}) {
-        //this.dataPath = dataPath;
+    constructor() {
+
         this.selectedObf = null;
         this.selectedRevier = null;
-        this.dataObj = dataObj
-        //this.map = new Map();
         this.views = {}
         this.currentView = null
         this.dataValid = {geoData: false, data: true};
@@ -25,7 +23,6 @@ class VWM{
         this.selectedYear = '2021';
         this.selectedLayer = 'ivus_verbiss';
         this.selectedResolution = 8;
-        this.areaId = null;
         this.is3D = false;
 
         this.currentArea = {
@@ -33,21 +30,46 @@ class VWM{
             9: null,
             10: null
         };
-        
+
+        const validHash = this.getHash();
+        this.toOverview(validHash);
+        this.getHash();
     }
-    toOverview(dataObj){
-        this.dataObj = dataObj || this.dataObj;
-        if(!this.dataObj.polygons){
-            console.error('polygons attribute is not defined');
-        }
-        
-        if(this.dataObj.mask){
-            this.getMaskLayer(this.dataObj.mask, 0, 8);
-        }
+    toOverview(validHash){
+
         this.selectedResolution = 8;
+        
+        this.getMaskLayer('./geo/land.geojson', 0, this.selectedResolution);
+
+        if(validHash) return;
+        
         this.currentArea[this.selectedResolution] = 'undefined';
         this.getH3Layer('./interpolation/' + this.selectedYear + '/' + this.selectedLayer + '/' +this.selectedResolution+ '/fid_' + this.currentArea[this.selectedResolution] + '_' +this.selectedResolution+ '.json', 'global', this.selectedResolution);
-        
+
+    }
+    getHash(){
+        if(window.location.hash) {
+            var hash = window.location.hash.substring(1).split(',');
+            if(hash[0] && parseInt(hash[0])){
+                this.currentArea[9] = parseInt(hash[0]);
+            }else{
+                return false;
+            }
+            if(hash[1] && parseInt(hash[1])){
+                this.currentArea[10] = parseInt(hash[1]);
+                this.focusObf(this.currentArea[10]);
+            }else{
+                this.focusLand(this.currentArea[9]);
+            }
+            return true;
+        }
+        return false;
+    }
+    setHash(){
+        if(this.currentArea[10])
+            window.location.hash = '#' + this.currentArea[9] + ',' + this.currentArea[10]
+        else if(this.currentArea[9])
+            window.location.hash = '#' + this.currentArea[9]
     }
     changeYear(newValue){
         if(this.selectedYear==newYear) return;
@@ -64,7 +86,7 @@ class VWM{
         const that = this;
         const selectElement = document.createElement('SELECT');
         let optionElement = document.createElement('OPTION');
-        optionElement.innerText = 'wählen ...';
+        optionElement.innerText = 'Oberförsterei';
         optionElement.setAttribute("value", 0);
         selectElement.append(optionElement);
 
@@ -95,7 +117,7 @@ class VWM{
         const that = this;
         const selectElement = document.createElement('SELECT');
         let optionElement = document.createElement('OPTION');
-        optionElement.innerText = 'wählen ...';
+        optionElement.innerText = 'Revier';
         optionElement.setAttribute("value", 0);
         selectElement.append(optionElement);
 
@@ -114,6 +136,158 @@ class VWM{
             
             that.focusObf(newValue);
         })
+    }
+    createAreaInfo(elementId){
+        this.infoElementId = elementId;
+        this.updateAreaInfo();
+    }
+    updateAreaInfo(){
+        let filteredArea = [];
+
+        if(!this.infoElementId) return
+
+        document.getElementById(this.infoElementId).innerHTML = '';
+
+        if(this.currentArea[10]){
+            filteredArea = obfRevierDd.default.filter(elem => elem.id == this.currentArea[10])
+        }else if(this.currentArea[9]){
+            filteredArea = obfObfDd.default.filter(elem => {
+                return elem.id == parseInt(this.currentArea[9])
+            })
+        }
+
+        if(!filteredArea.length >= 1) return;
+
+        let infoWindow = document.createElement('DIV');
+        infoWindow.classList.add('ge-info-window');
+        infoWindow.innerHTML = filteredArea[0].name;
+
+        document.getElementById(this.infoElementId).append(infoWindow);
+    }
+    removeLayer(resolution){
+        if(resolution && this.currentArea[resolution]){
+            this.currentArea[resolution] = null;
+            this.selectedResolution = resolution-1;
+            this.updateNavigation();
+        }
+    }
+    updateNavigation(){
+        this.updateAreaList();
+        this.updateAreaInfo();
+        this.updateList();
+
+        if(this.currentArea[10]){
+            document.body.classList.add('ge-res-10');
+            document.body.classList.remove('ge-res-9', 'ge-res-8');
+        }else if(this.currentArea[9]){
+            document.body.classList.add('ge-res-9');
+            document.body.classList.remove('ge-res-10', 'ge-res-8');
+        }else{
+            document.body.classList.add('ge-res-8');
+            document.body.classList.remove('ge-res-10', 'ge-res-9');
+        }
+
+        this.getH3Layer();
+        if(this.selectedResolution !== 8)
+            this.getMaskLayer('./geo/' + (this.selectedResolution == 9 ? 'obf' : 'reviere') + '/' + this.currentArea[this.selectedResolution] +'.geojson', this.currentArea[this.selectedResolution], this.selectedResolution);
+            
+    }
+    checkMobileNavigation(){
+        document.getElementById('ge-mobile-navigation')
+    }
+    createAreaList(elementId){
+        this.areaList = elementId;
+        
+        this.updateAreaList();
+    }
+    updateAreaList(){
+        if(!this.areaList) return;
+
+        document.getElementById(this.areaList).innerHTML = '';
+
+        if(this.currentArea[9]){
+            document.getElementById(this.areaList).append(this.getReviereList(this.currentArea[9]));
+        } else if(this.currentArea[8]){
+            document.getElementById(this.areaList).append(this.getObfList());
+        }
+        
+           
+    }
+    getObfList(){
+        const that = this;
+        this.listElementId = 'ge-area-list-Obf';
+
+        var data = obfObfDd.default.sort((a, b) => {
+            if(a.name < b.name) return -1;
+            if(a.name > b.name) return 1;
+            return 0
+        })
+
+        let listWrapper = document.createElement('DIV');
+        listWrapper.classList.add('ge-area-list');
+        //listWrapper.setAttribute('id', this.listElementId)
+
+        for(var i = 0; i < data.length; i++){
+
+            let lineElement = document.createElement('DIV');
+            lineElement.setAttribute('data-id', data[i].id)
+            lineElement.setAttribute('data-obf', data[i].obf)
+            lineElement.addEventListener('click', (e) => that.focusLand(e.target.getAttribute('data-id')))
+            lineElement.innerText = data[i].name;
+
+            listWrapper.append(lineElement);
+        }
+        return listWrapper;
+    }
+    getReviereList(parentId){
+        const that = this;
+        //this.listElementId = 'ge-area-list-Revier';
+
+        const filteredObf = obfObfDd.default.filter(elem => parseInt(elem.id) === parseInt(parentId))
+
+        if(filteredObf.length < 1) return;
+
+        const filteredByParent = obfRevierDd.default.filter(elem => parseInt(elem.obf) === parseInt(filteredObf[0].obf))
+
+        if(filteredByParent.length < 1) return;
+
+        var data = filteredByParent.sort((a, b) => {
+            if(a.name < b.name) return -1;
+            if(a.name > b.name) return 1;
+            return 0
+        })
+
+        let listWrapper = document.createElement('DIV');
+        listWrapper.classList.add('ge-area-list');
+        //listWrapper.setAttribute('id', this.listElementId)
+
+        for(var i = 0; i < data.length; i++){
+
+            let lineElement = document.createElement('DIV');
+            lineElement.setAttribute('data-id', data[i].id)
+            lineElement.addEventListener('click', (e) => that.focusObf(e.target.getAttribute('data-id')))
+            lineElement.innerText = data[i].name;
+
+            listWrapper.append(lineElement);
+        }
+        return listWrapper;
+    }
+    updateList(){
+        if(!this.listElementId) return;
+        const wrapper = document.getElementById(this.listElementId);
+
+        if (!wrapper || !wrapper.hasChildNodes()) return 
+
+        const children = document.getElementById(this.listElementId).childNodes;
+        
+        for(var i = 0; i < children.length; i++) {
+            const attribute = children[i].getAttribute('data-id');
+            if(attribute && attribute == this.currentArea[9]){
+                children[i].classList.add('active');
+            }else{
+                children[i].classList.remove('active');
+            }
+        }
     }
     addJsonLayer(url){
         this._loadJson(url).then(outlines => {
@@ -134,7 +308,9 @@ class VWM{
             //this.map.addMask('mask-layer-', outlines.features[0], id, resolution); //preId, data, featureId, resolution
         });
     }
-    getH3Layer(url, featureId, resolution){
+    getH3Layer(){
+        var url = './interpolation/' + this.selectedYear + '/' + this.selectedLayer + '/' +this.selectedResolution+ '/fid_' + this.currentArea[this.selectedResolution] + '_' +this.selectedResolution+ '.json';
+       
         this._loadJson(url).then(outlines => {
             this.h3Layer = outlines;
             this.refreshReact();
@@ -163,52 +339,36 @@ class VWM{
     addView(name, view){
         this.views[name] = view;
     }
-    focusLand(featureId, loadChild){
+    focusLand(featureId){
         if(featureId == 0){
             this.selectedResolution = 8;
         }else{
             this.selectedResolution = 9;
-            this.currentArea[9] = featureId;
-            this.areaId = featureId;
+            this.currentArea[this.selectedResolution] = featureId;
+            this.currentArea[10] = null;
+            this.setHash();
         }
-        /*if(loadChild)
-            this.addJsonLayer('./geo/obf/' + featureId + '.geojson');*/
+
+        this.updateNavigation();
             
-        this.getH3Layer('./interpolation/' + this.selectedYear + '/' + this.selectedLayer + '/' + this.selectedResolution + '/fid_' + this.currentArea[this.selectedResolution] +'_' + this.selectedResolution + '.json', this.currentArea[this.selectedResolution], this.selectedResolution); // layer[0].h3
+        /*this.getH3Layer();
         if(this.selectedResolution == 9)
             this.getMaskLayer('./geo/obf/' + this.currentArea[this.selectedResolution] +'.geojson', this.currentArea[this.selectedResolution], this.selectedResolution);
-        //this.setView(featureId, null);
+        //this.setView(featureId, null);*/
     }
-    focusObf(featureId, loadChild){console.log(featureId);
+    focusObf(featureId){
         if(featureId == 0){
             this.selectedResolution = 9;
-            var dir = 'obf';
+            
         }else{
             this.selectedResolution = 10;
-            this.currentArea[10] = featureId
-            this.areaId = featureId;
-            var dir = 'reviere';
+            this.currentArea[this.selectedResolution] = featureId
+            this.setHash();
         }
-        //if(loadChild)
-        //this.addJsonLayer('../processing/tmp/reviere/' + featureId + '.geojson'); // layer[0].polygons
-        
-        this.getH3Layer('./interpolation/' + this.selectedYear + '/' + this.selectedLayer + '/' + this.selectedResolution + '/fid_' + this.currentArea[this.selectedResolution] +'_' + this.selectedResolution + '.json', this.currentArea[this.selectedResolution], this.selectedResolution); // layer[0].h3
-        this.getMaskLayer('./geo/' + dir + '/' + this.currentArea[this.selectedResolution] +'.geojson', this.currentArea[this.selectedResolution], this.selectedResolution);
-        //this.setView(this.selectedObf, featureId);
+
+        this.updateNavigation();
     }
-    /*setView(selectedObf = null, selectedRevier = null){
-        this.selectedObf = selectedObf
-        this.selectedRevier = selectedRevier;
-        this.updateNavigation()
-    }
-    updateNavigation(){
-        document.getElementById('selectedObf').innerText = this.selectedObf || '';
-        document.getElementById('selectedRevier').innerText = this.selectedRevier || '';
-    }*/
-    addMap(elementId){
-        //this.map.init(elementId);
-        this.toOverview();
-    }
+    
     async _loadJson(url){
         const response = await fetch(url, {
             method: 'GET',

@@ -2,48 +2,49 @@
 <html lang="de">
     <head>
         <meta charset="utf-8">
-        <title>VWM Brandenburg</title>
+        <title>Verbiss und Schälprozent in BRandenburg</title>
         <meta name="description" content="Darstellung von Verjüngungszustands- und Wildeinflussmonitoring">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="./dist/bundle.iife.css" rel="stylesheet">
         <link rel="manifest" href="manifest.json">
         <meta name="theme-color" content="#00613A">
-        <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+        <!--<script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>-->
 
     </head>
-    <body>
+    <body class="ge-res-8">
         <section>
             <div id="ge-sidebar">
                 <div class="ge-side-header">
-                    <img height="80px" src="images/LFB Logo lang PNG.png" title="Logo Landesbetrieb Forst Brandenburg" alt="Logo Landesbetrieb Forst Brandenburg">
-                </div>
-                <div class="ge-side-content ge-grow">
-                    <div class="row">
-                        <div>
-                            <label>Oberförsterei</label>
-                            <div id="ge-obf-selection-wrapper"></div>
-                        </div>
-                        <div>
-                            <label>Revier</label><br/>
-                            <div id="ge-revier-selection-wrapper"></div>
-                        </div>
-                    </div>
-                    <br/>
+                    <a id="ge-logo-wrapper" href="https://forst.brandenburg.de/lfb/de/ueber-uns/landeskompetenzzentrum-lfe/wildschaeden-erfassen-und-vorbeugen/" target="blank">
+                        <img src="images/LFB Logo lang PNG.png" title="Logo Landesbetrieb Forst Brandenburg" alt="Logo Landesbetrieb Forst Brandenburg"/>
+                    </a>
                     <div class="row even">
                         <button type="button" class="ge-full-btn ge-grow" id="ge-layer-verbiss">Verbiss</button>
                         <button type="button" class="ge-full-btn ge-grow" id="ge-layer-schaele">Schäle</button>
                     </div>
+                    <div id="ge-area-info"></div>
                 </div>
+                <div id="ge-mobile-navigation" class="ge-side-content ge-grow">
+                    <div class="row">
+                        <div>
+                            <div id="ge-obf-selection-wrapper"></div><a class="ge-close-btn" id="ge-remove-8">&#x2715;</a>
+                        </div>
+                        <div>
+                            <div id="ge-revier-selection-wrapper"></div><a class="ge-close-btn" id="ge-remove-9">&#x2715;</a>
+                        </div>
+                    </div>
+                    <br/>
+                </div>
+                <div class="ge-side-content ge-grow" id="ge-area-list-wrapper"></div>
                 <div class="ge-side-footer">
                     <a href="https://forst.brandenburg.de/lfb/de/impressum/" target="_blank">Impressum</a>
-                    <a href="https://forst.brandenburg.de/lfb/de/datenschutz/" target="_blank">Datenschutz</a><br/><br/>
+                    <a href="https://forst.brandenburg.de/lfb/de/datenschutz/" target="_blank">Datenschutz</a>
                     <a href="http://www.openstreetmap.org/copyright/" target="_blank">
                         © OpenStreetMap contributors
                     </a>
                 </div>
             </div>
             <div id="ge-map">
-                <!--<canvas id="ge-canvas"></canvas>-->
                 <div id="react-gl"></div>
             </div>
         </section>
@@ -51,17 +52,12 @@
     </body>
     <script type="text/javascript" src="./dist/bundle.iife.js"></script>
     <script type="text/javascript">
-        var schema = {
-            mask: './geo/land.geojson',
-            polygons: './geo/obf.geojson'
-        }
         
-        var obj = new VWM(schema);
-
-        obj.addMap('ge-map', true)
-        //obj.addBasemap();
-
+        var obj = new VWM();
         obj.createObfDropdown('ge-obf-selection-wrapper', 'ge-revier-selection-wrapper');
+        obj.createAreaList('ge-area-list-wrapper');
+        obj.createAreaInfo('ge-area-info');
+        
         document.getElementById('ge-layer-verbiss').addEventListener('click', (e) => {
             document.getElementById('ge-layer-verbiss').classList.add("active");
             document.getElementById('ge-layer-schaele').classList.remove("active");
@@ -73,6 +69,10 @@
             document.getElementById('ge-layer-verbiss').classList.remove("active");
             obj.changeLayer('ivus_schaele')
         })
+
+        document.getElementById('ge-remove-8').addEventListener('click', () => obj.removeLayer('9'));
+        document.getElementById('ge-remove-9').addEventListener('click', () => obj.removeLayer('10'));
+        
        
     </script>
 </html>

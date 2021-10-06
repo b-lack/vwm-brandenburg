@@ -337,6 +337,7 @@ export default class {
         console.log('ADD LAYER', this.layers);
         
     }
+    //https://stackoverflow.com/questions/7128675/from-green-to-red-color-depend-on-percentage
     createPolygonsByH3(data, layerId){
         
         var h3Layer = new H3HexagonLayer({

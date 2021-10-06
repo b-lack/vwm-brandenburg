@@ -13,10 +13,11 @@
     "url": "git+https://github.com/b-lack/vwm-brandenburg.git"
   },
   "keywords": [
-    "forstwirtschaft",
-    "verjüngungm",
-    "wildeinfluss",
-    "monitoring"
+    "Forestry",
+    "Forstwirtschaft",
+    "Verjüngungm",
+    "Wildeinfluss",
+    "Monitoring"
   ],
   "author": "Gerrit Balindt",
   "license": "MIT",
@@ -40,7 +41,7 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-map-gl": "^6.1.17",
-    "transform-class-properties": "^1.0.0-beta",
+    
     "turf": "^3.0.14"
   },
   "devDependencies": {
@@ -62,6 +63,7 @@
     "rollup-plugin-live-server": "^2.0.0",
     "rollup-plugin-replace": "^2.2.0",
     "rollup-plugin-serve": "^1.1.0",
-    "rollup-plugin-terser": "^7.0.2"
+    "rollup-plugin-terser": "^7.0.2",
+    "transform-class-properties": "^1.0.0-beta"
   }
 }
