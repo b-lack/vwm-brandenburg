@@ -28,17 +28,23 @@
                             <div id="ge-revier-selection-wrapper"></div>
                         </div>
                     </div>
+                    <br/>
+                    <div class="row even">
+                        <button type="button" class="ge-full-btn ge-grow" id="ge-layer-verbiss">Verbiss</button>
+                        <button type="button" class="ge-full-btn ge-grow" id="ge-layer-schaele">Schäle</button>
+                    </div>
                 </div>
                 <div class="ge-side-footer">
                     <a href="https://forst.brandenburg.de/lfb/de/impressum/" target="_blank">Impressum</a>
-                    <a href="https://forst.brandenburg.de/lfb/de/datenschutz/" target="_blank">Datenschutz</a>
+                    <a href="https://forst.brandenburg.de/lfb/de/datenschutz/" target="_blank">Datenschutz</a><br/><br/>
                     <a href="http://www.openstreetmap.org/copyright/" target="_blank">
                         © OpenStreetMap contributors
                     </a>
                 </div>
             </div>
             <div id="ge-map">
-                <canvas id="ge-canvas"></canvas>
+                <!--<canvas id="ge-canvas"></canvas>-->
+                <div id="react-gl"></div>
             </div>
         </section>
         
@@ -53,9 +59,20 @@
         var obj = new VWM(schema);
 
         obj.addMap('ge-map', true)
-        obj.addBasemap();
+        //obj.addBasemap();
 
         obj.createObfDropdown('ge-obf-selection-wrapper', 'ge-revier-selection-wrapper');
+        document.getElementById('ge-layer-verbiss').addEventListener('click', (e) => {
+            document.getElementById('ge-layer-verbiss').classList.add("active");
+            document.getElementById('ge-layer-schaele').classList.remove("active");
+            obj.changeLayer('ivus_verbiss')
+        })
+        document.getElementById('ge-layer-verbiss').classList.add("active");
+        document.getElementById('ge-layer-schaele').addEventListener('click', () => {
+            document.getElementById('ge-layer-schaele').classList.add("active");
+            document.getElementById('ge-layer-verbiss').classList.remove("active");
+            obj.changeLayer('ivus_schaele')
+        })
        
     </script>
 </html>

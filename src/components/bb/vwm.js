@@ -1,5 +1,9 @@
 //import Map from '../map/map'
 //import APP from '../react-map/map'
+import React, {useState, useCallback} from 'react';
+import ReactApp from '../deckgl/react'
+
+import ReactDOM from 'react-dom';
 
 import Map from '../deckgl/map'
 import * as obfObfDd from '../../geo-resolution/obf.json';
@@ -11,14 +15,25 @@ class VWM{
         this.selectedObf = null;
         this.selectedRevier = null;
         this.dataObj = dataObj
-        this.map = new Map();
+        //this.map = new Map();
         this.views = {}
         this.currentView = null
         this.dataValid = {geoData: false, data: true};
         this.currentLayerKey = null;
         this.currentViewKey = '';
+
+        this.selectedYear = '2021';
+        this.selectedLayer = 'ivus_verbiss';
+        this.selectedResolution = 8;
+        this.areaId = null;
+        this.is3D = false;
+
+        this.currentArea = {
+            8: 'undefined',
+            9: null,
+            10: null
+        };
         
-        this.toOverview();
     }
     toOverview(dataObj){
         this.dataObj = dataObj || this.dataObj;
@@ -26,14 +41,24 @@ class VWM{
             console.error('polygons attribute is not defined');
         }
         
-        //this.addJsonLayer(this.dataObj.polygons);
-        this._loadJson(this.dataObj.polygons).then(outlines => {
-            this.map.addParent(outlines, this.focusLand.bind(this));
-        });
-
         if(this.dataObj.mask){
             this.getMaskLayer(this.dataObj.mask, 0, 8);
         }
+        this.selectedResolution = 8;
+        this.currentArea[this.selectedResolution] = 'undefined';
+        this.getH3Layer('./interpolation/' + this.selectedYear + '/' + this.selectedLayer + '/' +this.selectedResolution+ '/fid_' + this.currentArea[this.selectedResolution] + '_' +this.selectedResolution+ '.json', 'global', this.selectedResolution);
+        
+    }
+    changeYear(newValue){
+        if(this.selectedYear==newYear) return;
+        this.selectedYear = newValue;
+    }
+    changeLayer(newLayer){
+        if(this.selectedLayer==newLayer) return;
+        
+        this.selectedLayer = newLayer;
+        this.getH3Layer('./interpolation/' + this.selectedYear + '/' + this.selectedLayer + '/' +this.selectedResolution+ '/fid_' + this.currentArea[this.selectedResolution] + '_' +this.selectedResolution+ '.json', 'global', this.selectedResolution);
+
     }
     createObfDropdown(elementId, childId){
         const that = this;
@@ -92,144 +117,97 @@ class VWM{
     }
     addJsonLayer(url){
         this._loadJson(url).then(outlines => {
-            this.map.addObf(outlines, this.focusObf.bind(this));
+            //this.map.addObf(outlines, this.focusObf.bind(this));
         });
     }
     getMaskLayer(url, id, resolution){
         this._loadJson(url).then(outlines => {
             //this.map.addMask(outlines); //.features[0].geometry.coordinates[0][0]
-            this.map.addMask('mask-layer-', outlines.features[0], id, resolution); //preId, data, featureId, resolution
+            if(resolution==8)
+                this.maskLayer = outlines.features[0];
+            else{
+                this.focus = this.childMaskLayer !== outlines.features[0];
+                this.childMaskLayer = outlines.features[0];
+            }
+                
+            this.refreshReact();
+            //this.map.addMask('mask-layer-', outlines.features[0], id, resolution); //preId, data, featureId, resolution
         });
     }
     getH3Layer(url, featureId, resolution){
         this._loadJson(url).then(outlines => {
-            this.map.addPolygonsByH3('h3-hexagon-layer-', outlines, featureId, resolution);
+            this.h3Layer = outlines;
+            this.refreshReact();
+            //this.map.addPolygonsByH3('h3-hexagon-layer-', outlines, featureId, resolution, this.selectedLayer, this.selectedYear, true);
         }).catch(e => {
             console.log(e);
         });
     }
+    
+    changeView(e){
+        if(this.is3D !==e.viewState.pitch>0){
+            this.is3D = e.viewState.pitch>0
+            this.refreshReact();
+        }
+    }
+    refreshReact(){
+        var that = this;
+        
+        ReactDOM.render(
+            <ReactApp data={this.h3Layer} maskData={this.maskLayer} childMaskData={this.childMaskLayer} parent={function(e){
+                that.changeView(e)
+            }} show3D={this.is3D} resolution={this.selectedResolution}/>,
+            document.getElementById('react-gl')
+        );
+    }
     addView(name, view){
         this.views[name] = view;
     }
-    focusLand(featureId, loadChild){console.log('focusLand')
+    focusLand(featureId, loadChild){
+        if(featureId == 0){
+            this.selectedResolution = 8;
+        }else{
+            this.selectedResolution = 9;
+            this.currentArea[9] = featureId;
+            this.areaId = featureId;
+        }
         /*if(loadChild)
             this.addJsonLayer('./geo/obf/' + featureId + '.geojson');*/
-        this.getH3Layer('./interpolation/9/fid_' + featureId +'_9.json', featureId, 9); // layer[0].h3
-        this.getMaskLayer('./geo/obf/' + featureId +'.geojson', featureId, 9);
+            
+        this.getH3Layer('./interpolation/' + this.selectedYear + '/' + this.selectedLayer + '/' + this.selectedResolution + '/fid_' + this.currentArea[this.selectedResolution] +'_' + this.selectedResolution + '.json', this.currentArea[this.selectedResolution], this.selectedResolution); // layer[0].h3
+        if(this.selectedResolution == 9)
+            this.getMaskLayer('./geo/obf/' + this.currentArea[this.selectedResolution] +'.geojson', this.currentArea[this.selectedResolution], this.selectedResolution);
         //this.setView(featureId, null);
     }
-    focusObf(featureId, loadChild){console.log('focusObf')
+    focusObf(featureId, loadChild){console.log(featureId);
+        if(featureId == 0){
+            this.selectedResolution = 9;
+            var dir = 'obf';
+        }else{
+            this.selectedResolution = 10;
+            this.currentArea[10] = featureId
+            this.areaId = featureId;
+            var dir = 'reviere';
+        }
         //if(loadChild)
         //this.addJsonLayer('../processing/tmp/reviere/' + featureId + '.geojson'); // layer[0].polygons
-        this.getH3Layer('./interpolation/10/fid_' + featureId +'_10.json', featureId, 10); // layer[0].h3
-        this.getMaskLayer('./geo/reviere/' + featureId +'.geojson', featureId, 10);
+        
+        this.getH3Layer('./interpolation/' + this.selectedYear + '/' + this.selectedLayer + '/' + this.selectedResolution + '/fid_' + this.currentArea[this.selectedResolution] +'_' + this.selectedResolution + '.json', this.currentArea[this.selectedResolution], this.selectedResolution); // layer[0].h3
+        this.getMaskLayer('./geo/' + dir + '/' + this.currentArea[this.selectedResolution] +'.geojson', this.currentArea[this.selectedResolution], this.selectedResolution);
         //this.setView(this.selectedObf, featureId);
     }
-    setView(selectedObf = null, selectedRevier = null){
+    /*setView(selectedObf = null, selectedRevier = null){
         this.selectedObf = selectedObf
         this.selectedRevier = selectedRevier;
         this.updateNavigation()
     }
     updateNavigation(){
-        console.log(this.selectedObf);
         document.getElementById('selectedObf').innerText = this.selectedObf || '';
         document.getElementById('selectedRevier').innerText = this.selectedRevier || '';
-    }
-    
-    /*changeView(name){
-        if(!this.views[name] || this.currentViewKey === name) return false;
-
-        let newView = this.views[name];
-        if(newView.jsonOutlines){
-            this.currentViewKey = name;
-            this.addMask();
-        }else
-            this._loadJson(newView.outlines).then(outlines => {
-                this.currentViewKey = name;
-                newView.jsonOutlines = outlines;
-                this.changeLayer(0);
-                this.addMask();
-            });
     }*/
-    /*changeLayer(layerKey){
-        if(!this.views[this.currentViewKey].dataLayer[layerKey] || this.currentLayerKey === layerKey) return false;
-        
-        this.dataValid.data = false;
-
-        let newView = this.views[this.currentViewKey];
-        if(newView.dataLayer[layerKey].jsonData){
-            this.currentLayerKey = layerKey;
-            this.addDataLayer();
-        }else
-            this._loadJson(newView.dataLayer[layerKey].path).then(data => {
-                
-                //this.dataValid.data = true;
-                this.currentLayerKey = layerKey;
-                
-                newView.dataLayer[layerKey].jsonData = data;
-
-                this.addDataLayer();
-                //this.refreshWidgets(newView);
-            });
-    }
-    addDataLayer(){
-        this.map.addPolygonsByH3(this.views[this.currentViewKey].dataLayer[this.currentLayerKey].jsonData, this.views[this.currentViewKey].dataLayer[this.currentLayerKey].color);
-    }*/
-    /*checkDataValid(view){
-        if(this.dataValid.data && this.dataValid.geoData){
-            this.currentView = view;
-            this.refreshWidgets();
-        }
-    }*/
-    
-    /*refreshData(dataPath = '../data/bb_7_geo.json'){
-        this._loadJson(this.dataPath).then(data => {
-            this.data = data;
-            this.dataPath = dataPath;
-            this.refreshWidgets(true, false);
-        });
-    }
-    refreshGeoData(geoDataPath = '../data/land_small.json'){
-        this._loadJson(this.geoDataPath).then(data => {
-            this.data = data;
-            this.geoDataPath = geoDataPath;
-            this.refreshWidgets(false, true);
-        });
-    }*/
-    /*refreshWidgets(){
-        if(!this.currentView) return false;
-
-        this.addMask();
-        this.map.addPolygonsByH3(this.currentView.jsonData);
-    }
-    addMask(polygon){
-        if(this.views[this.currentViewKey]){
-            //this.map.addMask(polygon);
-            this.map.createMaskLayer(polygon);
-            //this.map.addMask(this.views[this.currentViewKey].jsonOutlines.features[0].geometry.coordinates[0][0]);
-        }
-           
-    }*/
-    removeMask(){
-        return this.map.removeMask();
-    }
-    addMap(elementId, basemap){
-        
-        this.map.init(elementId, basemap);
-        
-        return this.map;
-    }
-    addBasemap(){
-        const that = this;
-        //this.map.createBaseMap();
-        /*this.getH3Layer('./interpolation/8/1_8.json');
-        setTimeout(function(){
-            that.getH3Layer('./interpolation/8/3_8.json');
-        }, 2000)*/
-        this.getH3Layer('./interpolation/8/fid_undefined_8.json', 'global', 8);
-        /*for(var i=1; i<31; i++){
-            this.getH3Layer('./interpolation/8/'+i+'_8.json');
-        }*/
+    addMap(elementId){
+        //this.map.init(elementId);
+        this.toOverview();
     }
     async _loadJson(url){
         const response = await fetch(url, {

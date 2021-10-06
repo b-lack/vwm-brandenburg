@@ -1,6 +1,5 @@
 import './css/styles.css';
 import VWM from './components/bb/vwm'
-
 //export {renderToDom} from './components/react-map/map'
 
 export default VWM;

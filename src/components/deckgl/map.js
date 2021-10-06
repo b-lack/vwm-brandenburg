@@ -1,4 +1,4 @@
-import {Deck, WebMercatorViewport} from '@deck.gl/core';
+import {Deck, WebMercatorViewport, FlyToInterpolator} from '@deck.gl/core';
 import {BitmapLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {TileLayer, H3HexagonLayer} from '@deck.gl/geo-layers';
 
@@ -7,6 +7,7 @@ const devicePixelRatio = (typeof window !== 'undefined' && window.devicePixelRat
 let curState = {
     currentObf: null
 };
+
 
 export default class {
     constructor(elementId = 'ge-map'){
@@ -24,6 +25,7 @@ export default class {
         this.fid = null;
         this.h3Resolutions = {}
         this.maskLayers = {};
+        this.getElevation = false;
     }
     init(){
         this.deckgl = new Deck({
@@ -33,17 +35,22 @@ export default class {
             controller: true,
             layers: this.layers,
             onViewStateChange: ({viewState}) => {
-                //console.log( viewState );
+                
+                if(this.getElevation !== viewState.pitch > 0){
+                    this.getElevation = viewState.pitch > 0;
+                    this.setElevation();
+                }
+                //console.log( viewState, this.getElevation );
             },
             getTooltip: ({object}) => object && this.showToolTip(object)
         });
         this.createBaseMap();
-        this.createPolygonsByH3();
+        //this.createPolygonsByH3();
     }
     showToolTip(object){
         var value = Math.round(object.val).toString();
         return {
-            html: `<span>-</span><div>${value} %</div>`,
+            html: `<div>${value} %</div>`,
             style: {
               backgroundColor: '#fff',
               fontSize: '1em'
@@ -87,6 +94,7 @@ export default class {
         let found = false;
 
         for( var i in this.layers){
+            console.log(this.layers[i]);
             if(this.layers[i].id.startsWith(preId) && this.layers[i].id !== 'mask-layer-0_8')
                 this.layers[i] = this.layers[i].clone({visible: false})
 
@@ -105,16 +113,16 @@ export default class {
         this.maskLayer = new GeoJsonLayer({
             id: preId + featureId + '_' + resolution,
             data: this.polyMask(data),
-            getFillColor: preId + featureId + '_' + resolution == 'mask-layer-0_8' ? [255,255,255,255] : [255,255,255,200],
+            getFillColor: preId + featureId + '_' + resolution == 'mask-layer-0_8' ? [255,255,255,255] : [255,255,255,150],
             stroked: false,
             extruded: false,
             wireframe: true,
             lineJointRounded: true,
         });
         this.layers.push(this.maskLayer);
-        console.log('Mask created');
+        
         //this.deckgl.setProps({ layers: [...[this.maskLayer]] });
-        this.fitBounds(data);
+        this.fitBounds(data, resolution);
         /*
         console.log(this.maskLayer);
         if(this.maskLayer){
@@ -149,19 +157,23 @@ export default class {
         const mask = turf.difference(bboxPoly, isochrone);
         return mask;
     }
-    fitBounds(feature){
+    fitBounds(feature, resolution){
+        this.lastMask = feature;
+
         var bbox = turf.bbox(feature);
         const viewport = new WebMercatorViewport(this.deckgl.viewState);
+        
+        let {bearing, pitch} = viewport;
         let {longitude, latitude, zoom} = viewport.fitBounds([
             [bbox[0], bbox[1]],
             [bbox[2], bbox[3]]
         ]);
+
+        zoom = resolution == 8 ? 7 : resolution;
+
         
-        // Zoom to the object
-        console.log(zoom);
-        zoom = 7;
         this.deckgl.setProps({
-            initialViewState: {longitude, latitude, zoom, minZoom: 6, maxZoom: 14, bearing: 0, pitch: 0}
+            initialViewState: {longitude, latitude, zoom, bearing, pitch}
         });
         
     }
@@ -248,45 +260,110 @@ export default class {
         }
         this.deckgl.setProps({layers: this.layers})
     }
-    /*getLayerById(id){
+    getLayerById(id){
         return this.layers.filter(elem => elem.id === id);
-    }*/
-    addPolygonsByH3(preId, data, featureId, resolution){
+    }
+    setElevation(){
+        for( var i in this.layers){
+            this.layers[i] = this.layers[i].clone({getElevation: d => this.getElevation ? d.val : 0})
+        }
+        console.log('change setElevation');
+    }
+    addPolygonsByH3(preId, data, featureId, resolution, layer, year, force){
+        const layerId = preId + featureId + '_' + resolution + '_' + layer;
+        console.log(layerId, force);
 
         for( var i in this.layers){
-            if(this.layers[i].id.startsWith(preId))
-                this.layers[i] = this.layers[i].clone({visible: false})
-            if(this.layers[i].id === preId + featureId + '_' + resolution){
-                this.layers[i] = this.layers[i].clone({visible: true})
+            if(this.layers[i].id === 'hey'){
+                this.layers.splice(i, 1)
+                
             }
+                
+            /*if(this.layers[i].id.startsWith(preId))
+                this.layers[i] = this.layers[i].clone({visible: false})
+            if(this.layers[i].id === layerId){
+                console.log('visible: ', layerId);
+                this.layers[i] = this.layers[i].clone({visible: true})
+            }*/
         }
+        console.log('dsfsfsdffsdf: Update');
+        this.layers.push(this.createPolygonsByH3(data, 'hey'));
+            //this.deckgl.setProps({layers: this.layers})
+        if(!this.deckgl) return;
+        var newState = this.INITIAL_VIEW_STATE;
+        newState.latitude = this.deckgl.viewState.latitude;
+        newState.longitude = this.deckgl.viewState.longitude;
+        console.log('setProps', this.deckgl.viewState);
+        this.deckgl.setProps({
+            layers: this.layers,
+            initialViewState: {...newState, transitionInterpolator: new FlyToInterpolator({speed: 0.5}),
+            transitionDuration: 0}
+        })
+        return;
 
-        if(!this.h3Resolutions[featureId + '_' + resolution]){
+        if(!this.h3Resolutions[layerId]){
             
-            this.h3Resolutions[featureId + '_' + resolution] = true;
+            this.h3Resolutions[layerId] = true;
+            
+            this.createPolygonsByH3(data, layerId);
 
-            this.createPolygonsByH3(preId,data, featureId, resolution);
+        }else if(force){
+            this.h3Resolutions[layerId] = true;
+            for( var i in this.layers){
+                if(this.layers[i].id === layerId){
+                    //this.layers[i] = this.layers[i].clone({data: data})
 
+                    //this.layers[i] = this.layers[i].clone({getElevation: d => this.getElevation ? d.val : 0})
+                    this.layers.splice(i, 1)
+                    //console.log('GET UPDATE: getElevation', this.layers[i]);
+                    /*this.layers[i].setProps({
+                        getElevation: d => this.getElevation ? d.val : 0,
+                        updateTriggers: {
+                            getElevation: this.getElevation
+                        }
+                    });*/
+                }
+            }
+            this.createPolygonsByH3(data, layerId);
+
+            //this.deckgl.redraw(true);
+            /*this.deckgl.setProps({
+                initialViewState: {longitude, latitude, zoom, bearing, pitch}
+            });*/
+            
         }
-
-    }
-    createPolygonsByH3(preId, data, featureId, resolution){
+        this.deckgl.setProps({layers: this.layers})
+        this.deckgl.redraw(true);
+        console.log('ADD LAYER', this.layers);
         
-        this.h3Layer = new H3HexagonLayer({
-            id: preId + featureId + '_' + resolution,
+    }
+    createPolygonsByH3(data, layerId){
+        
+        var h3Layer = new H3HexagonLayer({
+            id: layerId,
             data: data,
             pickable: true,
             wireframe: false,
             filled: true,
             extruded: true,
-            elevationScale: 50,
+            elevationScale: 25,
             coverage: 0.9,
-            visible: this.h3Resolutions[featureId + '_' + resolution],
+            visible: true, //this.h3Resolutions[layerId],
             getHexagon: d =>  d.hex || d.hex10,
-            getFillColor: d => [( d.val / 100) * 255, (1 - d.val / 100) * 255, 0],
-            getElevation: d => d.val
+            getFillColor: d => [( d.val / 100) * 157, (1 - d.val / 100) * 255, 157, 150], // 157, 181, 157
+            getElevation: d => this.getElevation ? d.val : 0
         });
 
-        this.layers.push(this.h3Layer);
+        //this.layers.push(h3Layer);
+        return h3Layer;
     }
 }
+/*
+// Wenn 100%
+100 / 100 * 157 = 157 
+(1 - 100 / 100) * 181 = 0
+
+// Wenn 0%
+0 / 100 * 157 = 0 
+(1 - 0 / 100) * 181 = 181
+*/

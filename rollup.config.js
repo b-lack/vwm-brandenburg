@@ -7,6 +7,7 @@ import jsx from 'rollup-plugin-jsx'
 import commonjs from '@rollup/plugin-commonjs'
 import babel from '@rollup/plugin-babel'
 import replace from 'rollup-plugin-replace';
+import serve from 'rollup-plugin-serve'
 
 
 
@@ -44,6 +45,10 @@ export default [
             commonjs(),
             json({
                 compact: true,
+            }),
+            serve({
+                contentBase: 'example',
+                open: true
             }),
         ]
     }

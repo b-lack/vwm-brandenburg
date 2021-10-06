@@ -16,6 +16,9 @@ body {
     justify-content: space-between;
     flex-direction: row;
 }
+.row.even{
+    justify-content:stretch;
+}
 label{
     font-size: 0.8em;
 }
@@ -65,4 +68,28 @@ section > *{flex-grow: 2;min-height: 300px;position: relative;}
         min-width: 300px;
         width: 80vw;
     }
+}
+#ge-layer-verbiss{
+    margin-right: 10px;
+}
+.ge-full-btn{
+    border: none;
+    display: block;
+    padding: 10px;
+    background: #eee;
+    color: #333;
+    cursor: pointer;
+    border: 1px solid #333;
+}
+.ge-full-btn.active{
+    background: #44754b;
+    color: #fff;
+}
+.ge-full-btn:hover:not(.active){
+    border: none;
+    display: block;
+    padding: 10px;
+    background: #9db59d;
+    color: #fff;
+    cursor: pointer;
 }

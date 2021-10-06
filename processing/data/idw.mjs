@@ -1,7 +1,12 @@
-/*
-node processing/data/idw.mjs --resolution 8
-node processing/data/idw.mjs --resolution 9
-node processing/data/idw.mjs --resolution 10
+/**
+ * node processing/data/idw.mjs --year 2021 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/ivus_schaele.json --resolution 8
+ * node processing/data/idw.mjs --year 2021 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/ivus_schaele.json --resolution 9
+ * node processing/data/idw.mjs --year 2021 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/ivus_schaele.json --resolution 10
+ * 
+ * node processing/data/idw.mjs --year 2021 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/ivus_verbiss.json --resolution 8
+ * node processing/data/idw.mjs --year 2021 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/ivus_verbiss.json --resolution 9
+ * node processing/data/idw.mjs --year 2021 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/ivus_verbiss.json --resolution 10
+ * 
 */
 
 import * as turf from '@turf/turf'
@@ -9,11 +14,26 @@ import fs from 'fs';
 import * as h3 from 'h3-js'
 import minimist from 'minimist'
 import { URL } from 'url';
+import path from 'path'
 
 var argv = minimist(process.argv.slice(2));
 
 let RESOLUTION;
+let YEAR;
+let DATAFILEPATH;
 
+if(typeof argv.year === "undefined") {
+    console.warn('"--YEAR" attribute missing');
+    process.exit(1);
+}else{
+    YEAR = argv.year;
+}
+if(typeof argv.dataFilePath === "undefined") {
+    console.warn('"--dataFilePath" attribute missing');
+    process.exit(1);
+}else{
+    DATAFILEPATH = argv.dataFilePath;
+}
 if(typeof argv.resolution === "undefined") {
     console.warn('"--resolution" attribute missing');
     process.exit(1);
@@ -21,17 +41,21 @@ if(typeof argv.resolution === "undefined") {
     RESOLUTION = argv.resolution;
 }
 
+
 const __dirname = new URL('./', import.meta.url).pathname;
 
-//https://github.com/NicolaiMogensen/Inverse-Distance-Weighting-JS/blob/master/idwJS.js
+var dataFileName = path.basename(DATAFILEPATH).split('.')[0];
 
 const SURVEYDIRECTORY = __dirname + '../tmp/resolutions_clean/' + RESOLUTION + '/';
-const OUTPUTDIRECTORY = __dirname + '../tmp/interpolation/' + RESOLUTION + '/';
+const OUTPUTDIRECTORY = __dirname + '../tmp/interpolation/' + YEAR + '/' + dataFileName + '/' + RESOLUTION + '/';
+
+
 
 if (!fs.existsSync(OUTPUTDIRECTORY)){
     fs.mkdirSync(OUTPUTDIRECTORY, { recursive: true });
 }
 
+//https://github.com/NicolaiMogensen/Inverse-Distance-Weighting-JS/blob/master/idwJS.js
 function calcVal(v, points, p) {
     var top = 0; 
     var bot = 0;
@@ -53,7 +77,7 @@ function calcDist(p, q) {
 
 
 // load meassured data
-const survey_points = fs.readFileSync(__dirname + '../tmp/survey-data/verbiss_ausw_fl_data_2021.json');
+const survey_points = fs.readFileSync(DATAFILEPATH);
 const surveyPointsObj = JSON.parse(survey_points);
 
 
@@ -92,7 +116,6 @@ function walkDir(files){
     }
 }
 
-console.log(SURVEYDIRECTORY);
 fs.readdir(SURVEYDIRECTORY, (err, files) => {
     walkDir(files)
 });
