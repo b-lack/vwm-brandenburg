@@ -15,14 +15,15 @@ body {
     top:0;
 }
 #ge-logo-wrapper{
+    padding: 20px 20px 10px 20px;
     display: block;
 }
-.row{
+.ge-row{
     display:flex;
     justify-content: space-between;
     flex-direction: row;
 }
-.row.even{
+.ge-row.even{
     justify-content:stretch;
 }
 label{
@@ -37,7 +38,6 @@ label{
     height: 100vh;
 }
 .ge-side-header{
-    padding: 20px;
     border-bottom: 1px solid #aaa;
 }
 .ge-side-content{
@@ -74,8 +74,8 @@ section > *{flex-grow: 2;min-height: 300px;position: relative;}
 .ge-full-btn{
     border: none;
     display: block;
-    padding: 5px;
-    background: #eee;
+    padding: 5px 10px;
+    background: #fefefe;
     color: #333;
     cursor: pointer;
     border: 1px solid #333;
@@ -83,9 +83,18 @@ section > *{flex-grow: 2;min-height: 300px;position: relative;}
 .ge-full-btn.active{
     background: #44754b;
     color: #fff;
+    border:none;
 }
 .ge-full-btn:hover:not(.active){
     background: #9db59d;
+    color: #fff;
+}
+.ge-info-window .ge-selection{
+    border-bottom: 1px solid #253f29;
+    padding: 10px;
+    font-size: 1.2em;
+    cursor: pointer;
+    background-color: #44754b;
     color: #fff;
 }
 
@@ -95,7 +104,9 @@ section > *{flex-grow: 2;min-height: 300px;position: relative;}
     font-size: 1.2em;
     cursor: pointer;
 }
+
 .ge-area-list > *.active{
+    display: none;
     background-color: #44754b;
     color: #fff;
 }
@@ -109,15 +120,36 @@ section > *{flex-grow: 2;min-height: 300px;position: relative;}
 #ge-logo-wrapper img{
     height: 75px;
 }
+#ge-layer-control{
+    position: fixed;
+    z-index: 100;
+    top: 10px;
+    right: 10px;
+}
+#ge-description{
+    padding: 0 15px 10px;
+    font-size: 0.9em;
+}
+.ge-subheader{
+    color: #888;
+    font-size: 00.8em;
+    margin: 10px 5px 5px;
+}
 @media (max-width: 600px) {
+    #ge-layer-control{
+        position: relative;
+    }
     #ge-sidebar{
         height: auto;
+    }
+    #ge-description{
+        display: none;
     }
     section > *:first-child{
         position:absolute;
         z-index: 1000;
     }
-    #ge-area-list-wrapper{
+    #ge-area-list-wrapper, #ge-area-info{
         display: none;
     }
     #ge-mobile-navigation{
@@ -125,7 +157,7 @@ section > *{flex-grow: 2;min-height: 300px;position: relative;}
         position: fixed;
         top: 65px;
     }
-    #ge-mobile-navigation .row > div{
+    #ge-mobile-navigation .ge-row > div{
         background-color: white;
         padding: 10px;
         margin: 5px;
@@ -135,13 +167,13 @@ section > *{flex-grow: 2;min-height: 300px;position: relative;}
    #ge-mobile-navigation .ge-close-btn{
         margin-left: 5px;
     }
-    .ge-res-8 #ge-mobile-navigation .row > div:first-child .ge-close-btn{
+    .ge-res-8 #ge-mobile-navigation .ge-row > div:first-child .ge-close-btn{
         display: none;
     }
-    .ge-res-9 #ge-mobile-navigation .row > div:nth-child(2n) .ge-close-btn{
+    .ge-res-9 #ge-mobile-navigation .ge-row > div:nth-child(2n) .ge-close-btn{
         display: none;
     }
-    .ge-res-8 #ge-mobile-navigation .row > div:nth-child(2n){
+    .ge-res-8 #ge-mobile-navigation .ge-row > div:nth-child(2n){
         display: none;
     }
     .ge-side-footer{
@@ -168,11 +200,21 @@ section > *{flex-grow: 2;min-height: 300px;position: relative;}
         border: none;
         box-shadow: 0 0 2px #666;
     }
-
+    #ge-logo-wrapper{
+        padding: 0;
+    }
     #ge-logo-wrapper img{
         height: 50px;
     }
     #ge-area-info{
         display: none;
+    }
+}
+@media (max-height: 400px) {
+    .ge-side-content{
+        overflow-y: initial;
+    }
+    #ge-sidebar{
+        overflow-y: scroll;
     }
 }

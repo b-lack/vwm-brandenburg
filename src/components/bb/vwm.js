@@ -82,23 +82,31 @@ class VWM{
         this.getH3Layer('./interpolation/' + this.selectedYear + '/' + this.selectedLayer + '/' +this.selectedResolution+ '/fid_' + this.currentArea[this.selectedResolution] + '_' +this.selectedResolution+ '.json', 'global', this.selectedResolution);
 
     }
+    updateDropDowns(){
+        if(this.obfDropDown){
+            this.obfDropDown.value = this.currentArea[9] ? this.currentArea[9] : 0;
+        }
+        if(this.revierDropDown){
+            this.revierDropDown.value = this.currentArea[10] ? this.currentArea[10] : 0;
+        }
+    }
     createObfDropdown(elementId, childId){
         const that = this;
-        const selectElement = document.createElement('SELECT');
+        this.obfDropDown = document.createElement('SELECT');
         let optionElement = document.createElement('OPTION');
         optionElement.innerText = 'Oberförsterei';
         optionElement.setAttribute("value", 0);
-        selectElement.append(optionElement);
+        this.obfDropDown.append(optionElement);
 
         for(var i = 0; i < obfObfDd.default.length; i++){
             let optionElement = document.createElement('OPTION');
             optionElement.innerText = obfObfDd.default[i].name;
             optionElement.setAttribute("value", obfObfDd.default[i].id);
-            selectElement.append(optionElement);
+            this.obfDropDown.append(optionElement);
         }
 
-        document.getElementById(elementId).append(selectElement);
-        selectElement.addEventListener('change', (e) => {
+        document.getElementById(elementId).append(this.obfDropDown);
+        this.obfDropDown.addEventListener('change', (e) => {
             const newValue = e.target.options[e.target.selectedIndex].value;
             if(newValue === 0) return;
 
@@ -115,22 +123,22 @@ class VWM{
         const filteredByParent = obfRevierDd.default.filter(elem => elem.obf === parentId)
 
         const that = this;
-        const selectElement = document.createElement('SELECT');
+        this.revierDropDown = document.createElement('SELECT');
         let optionElement = document.createElement('OPTION');
         optionElement.innerText = 'Revier';
         optionElement.setAttribute("value", 0);
-        selectElement.append(optionElement);
+        this.revierDropDown.append(optionElement);
 
         for(var i = 0; i < filteredByParent.length; i++){
             let optionElement = document.createElement('OPTION');
             optionElement.innerText = filteredByParent[i].name;
             optionElement.setAttribute("value", filteredByParent[i].id);
-            selectElement.append(optionElement);
+            this.revierDropDown.append(optionElement);
         }
 
         document.getElementById(elementId).innerHTML = '';
-        document.getElementById(elementId).append(selectElement);
-        selectElement.addEventListener('change', (e) => {
+        document.getElementById(elementId).append(this.revierDropDown);
+        this.revierDropDown.addEventListener('change', (e) => {
             var newValue = e.target.options[e.target.selectedIndex].value;
             if(newValue === 0) return;
             
@@ -142,25 +150,65 @@ class VWM{
         this.updateAreaInfo();
     }
     updateAreaInfo(){
-        let filteredArea = [];
+        let filteredObfArea = [], filteredRevierArea = [];
 
         if(!this.infoElementId) return
 
         document.getElementById(this.infoElementId).innerHTML = '';
 
         if(this.currentArea[10]){
-            filteredArea = obfRevierDd.default.filter(elem => elem.id == this.currentArea[10])
-        }else if(this.currentArea[9]){
-            filteredArea = obfObfDd.default.filter(elem => {
+            filteredRevierArea = obfRevierDd.default.filter(elem => elem.id == this.currentArea[10])
+        }
+        if(this.currentArea[9]){
+            filteredObfArea = obfObfDd.default.filter(elem => {
                 return elem.id == parseInt(this.currentArea[9])
             })
         }
 
-        if(!filteredArea.length >= 1) return;
-
-        let infoWindow = document.createElement('DIV');
+        const infoWindow = document.createElement('DIV');
         infoWindow.classList.add('ge-info-window');
-        infoWindow.innerHTML = filteredArea[0].name;
+
+        if(filteredObfArea.length > 0){
+    
+            let infoLine = document.createElement('DIV');
+            infoLine.classList.add('ge-row', 'ge-selection');
+            let obfName = document.createElement('DIV');
+            obfName.innerText = filteredObfArea[0].name;
+            infoLine.append(obfName);
+            let obfClose = document.createElement('DIV');
+            obfClose.innerHTML = '&#x2715;';
+            obfClose.addEventListener('click', () => obj.removeLayer('9'));
+            infoLine.append(obfClose);
+
+            infoWindow.append(infoLine);
+        }
+
+        if(filteredRevierArea.length > 0){
+
+            let infoLine = document.createElement('DIV');
+            infoLine.classList.add('ge-row', 'ge-selection');
+            let obfName = document.createElement('DIV');
+            obfName.innerText = filteredRevierArea[0].name;
+            infoLine.append(obfName);
+            let obfClose = document.createElement('DIV');
+            obfClose.innerHTML = '&#x2715;';
+            obfClose.addEventListener('click', () => obj.removeLayer('10'));
+            infoLine.append(obfClose);
+            
+            infoWindow.append(infoLine);
+        }
+        
+        if(filteredObfArea.length ==0){
+            const subHeader = document.createElement('DIV');
+            subHeader.classList.add('ge-subheader');
+            subHeader.innerText = 'Wähle eine Oberförsterei';
+            infoWindow.append(subHeader);
+        }else{
+            const subHeader = document.createElement('DIV');
+            subHeader.classList.add('ge-subheader');
+            subHeader.innerText = 'Wähle ein Revier';
+            infoWindow.append(subHeader);
+        };
 
         document.getElementById(this.infoElementId).append(infoWindow);
     }
@@ -175,6 +223,8 @@ class VWM{
         this.updateAreaList();
         this.updateAreaInfo();
         this.updateList();
+        this.updateRevierList();
+        this.updateDropDowns();
 
         if(this.currentArea[10]){
             document.body.classList.add('ge-res-10');
@@ -215,7 +265,7 @@ class VWM{
     }
     getObfList(){
         const that = this;
-        this.listElementId = 'ge-area-list-Obf';
+        this.oBfListElementId = 'ge-area-list-Obf';
 
         var data = obfObfDd.default.sort((a, b) => {
             if(a.name < b.name) return -1;
@@ -225,7 +275,7 @@ class VWM{
 
         let listWrapper = document.createElement('DIV');
         listWrapper.classList.add('ge-area-list');
-        //listWrapper.setAttribute('id', this.listElementId)
+        listWrapper.setAttribute('id', this.listElementId)
 
         for(var i = 0; i < data.length; i++){
 
@@ -241,7 +291,7 @@ class VWM{
     }
     getReviereList(parentId){
         const that = this;
-        //this.listElementId = 'ge-area-list-Revier';
+        this.revierListElementId = 'ge-area-list-Revier';
 
         const filteredObf = obfObfDd.default.filter(elem => parseInt(elem.id) === parseInt(parentId))
 
@@ -259,7 +309,7 @@ class VWM{
 
         let listWrapper = document.createElement('DIV');
         listWrapper.classList.add('ge-area-list');
-        //listWrapper.setAttribute('id', this.listElementId)
+        listWrapper.setAttribute('id', this.revierListElementId)
 
         for(var i = 0; i < data.length; i++){
 
@@ -273,16 +323,34 @@ class VWM{
         return listWrapper;
     }
     updateList(){
-        if(!this.listElementId) return;
-        const wrapper = document.getElementById(this.listElementId);
+        if(!this.oBfListElementId) return;
+        const wrapper = document.getElementById(this.oBfListElementId);
 
         if (!wrapper || !wrapper.hasChildNodes()) return 
 
-        const children = document.getElementById(this.listElementId).childNodes;
+        const children = document.getElementById(this.oBfListElementId).childNodes;
         
         for(var i = 0; i < children.length; i++) {
             const attribute = children[i].getAttribute('data-id');
             if(attribute && attribute == this.currentArea[9]){
+                children[i].classList.add('active');
+            }else{
+                children[i].classList.remove('active');
+            }
+        }
+    }
+    updateRevierList(){
+        
+        if(!this.revierListElementId) return;
+        const wrapper = document.getElementById(this.revierListElementId);
+
+        if (!wrapper || !wrapper.hasChildNodes()) return 
+
+        const children = document.getElementById(this.revierListElementId).childNodes;
+        
+        for(var i = 0; i < children.length; i++) {
+            const attribute = children[i].getAttribute('data-id');
+            if(attribute && attribute == this.currentArea[10]){
                 children[i].classList.add('active');
             }else{
                 children[i].classList.remove('active');

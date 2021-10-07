@@ -9,9 +9,16 @@ Darstellung von Verjüngungszustands- und Wildeinflussmonitoring.
 npm install
 # or
 yarn
+```
+
+```bash
 # bundle and serve the app
 npm run dev
+```
 
+Visit: [http://localhost:10001/](http://localhost:10001/)
+
+```bash
 # bundle and build the app
 npm run build
 ```
