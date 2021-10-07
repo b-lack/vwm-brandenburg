@@ -21,7 +21,7 @@ class VWM{
         this.currentViewKey = '';
 
         this.selectedYear = '2021';
-        this.selectedLayer = 'ivus_verbiss';
+        this.selectedLayer = null;
         this.selectedResolution = 8;
         this.is3D = false;
 
@@ -31,20 +31,24 @@ class VWM{
             10: null
         };
 
-        const validHash = this.getHash();
-        this.toOverview(validHash);
+        //const validHash = this.getHash();
+        //this.toOverview(validHash);
         this.getHash();
     }
     toOverview(validHash){
 
         this.selectedResolution = 8;
         
-        this.getMaskLayer('./geo/land.geojson', 0, this.selectedResolution);
+        //this.updateNavigation();
 
-        if(validHash) return;
+        //this.getMaskLayer('./geo/land.geojson', 0, this.selectedResolution);
+
+        //if(validHash) return;
         
-        this.currentArea[this.selectedResolution] = 'undefined';
-        this.getH3Layer('./interpolation/' + this.selectedYear + '/' + this.selectedLayer + '/' +this.selectedResolution+ '/fid_' + this.currentArea[this.selectedResolution] + '_' +this.selectedResolution+ '.json', 'global', this.selectedResolution);
+        //this.currentArea[this.selectedResolution] = 'undefined';
+
+        
+        //this.getH3Layer('./interpolation/' + this.selectedYear + '/' + this.selectedLayer + '/' +this.selectedResolution+ '/fid_' + this.currentArea[this.selectedResolution] + '_' +this.selectedResolution+ '.json', 'global', this.selectedResolution);
 
     }
     getHash(){
@@ -70,6 +74,8 @@ class VWM{
             window.location.hash = '#' + this.currentArea[9] + ',' + this.currentArea[10]
         else if(this.currentArea[9])
             window.location.hash = '#' + this.currentArea[9]
+        else
+            window.location.hash = ''
     }
     changeYear(newValue){
         if(this.selectedYear==newYear) return;
@@ -79,7 +85,10 @@ class VWM{
         if(this.selectedLayer==newLayer) return;
         
         this.selectedLayer = newLayer;
-        this.getH3Layer('./interpolation/' + this.selectedYear + '/' + this.selectedLayer + '/' +this.selectedResolution+ '/fid_' + this.currentArea[this.selectedResolution] + '_' +this.selectedResolution+ '.json', 'global', this.selectedResolution);
+
+        this.updateNavigation();
+        //this.getH3Layer();
+        //this.getH3Layer('./interpolation/' + this.selectedYear + '/' + this.selectedLayer + '/' +this.selectedResolution+ '/fid_' + this.currentArea[this.selectedResolution] + '_' +this.selectedResolution+ '.json', 'global', this.selectedResolution);
 
     }
     updateDropDowns(){
@@ -225,6 +234,7 @@ class VWM{
         this.updateList();
         this.updateRevierList();
         this.updateDropDowns();
+        this.setHash();
 
         if(this.currentArea[10]){
             document.body.classList.add('ge-res-10');
@@ -237,10 +247,12 @@ class VWM{
             document.body.classList.remove('ge-res-10', 'ge-res-9');
         }
 
+
         this.getH3Layer();
         if(this.selectedResolution !== 8)
             this.getMaskLayer('./geo/' + (this.selectedResolution == 9 ? 'obf' : 'reviere') + '/' + this.currentArea[this.selectedResolution] +'.geojson', this.currentArea[this.selectedResolution], this.selectedResolution);
-            
+        else
+            this.getMaskLayer('./geo/land.geojson', 0, this.selectedResolution);
     }
     checkMobileNavigation(){
         document.getElementById('ge-mobile-navigation')
@@ -357,35 +369,30 @@ class VWM{
             }
         }
     }
-    addJsonLayer(url){
-        this._loadJson(url).then(outlines => {
-            //this.map.addObf(outlines, this.focusObf.bind(this));
-        });
-    }
     getMaskLayer(url, id, resolution){
         this._loadJson(url).then(outlines => {
-            //this.map.addMask(outlines); //.features[0].geometry.coordinates[0][0]
-            if(resolution==8)
+            if(resolution==8){
                 this.maskLayer = outlines.features[0];
-            else{
+                this.childMaskLayer = null;
+            }else{
                 this.focus = this.childMaskLayer !== outlines.features[0];
                 this.childMaskLayer = outlines.features[0];
             }
                 
             this.refreshReact();
-            //this.map.addMask('mask-layer-', outlines.features[0], id, resolution); //preId, data, featureId, resolution
-        });
+        }).catch(e => console.error(e));
     }
     getH3Layer(){
+        if(!this.selectedYear || !this.selectedLayer || !this.selectedResolution) return;
+
         var url = './interpolation/' + this.selectedYear + '/' + this.selectedLayer + '/' +this.selectedResolution+ '/fid_' + this.currentArea[this.selectedResolution] + '_' +this.selectedResolution+ '.json';
        
         this._loadJson(url).then(outlines => {
             this.h3Layer = outlines;
             this.refreshReact();
-            //this.map.addPolygonsByH3('h3-hexagon-layer-', outlines, featureId, resolution, this.selectedLayer, this.selectedYear, true);
         }).catch(e => {
             console.log(e);
-        });
+        }).catch(e => console.error(e));
     }
     
     changeView(e){
@@ -396,11 +403,13 @@ class VWM{
     }
     refreshReact(){
         var that = this;
+
+        if(!this.selectedLayer) return;
         
         ReactDOM.render(
             <ReactApp data={this.h3Layer} maskData={this.maskLayer} childMaskData={this.childMaskLayer} parent={function(e){
                 that.changeView(e)
-            }} show3D={this.is3D} resolution={this.selectedResolution}/>,
+            }} show3D={this.is3D} resolution={this.selectedResolution} layer={this.selectedLayer}/>,
             document.getElementById('react-gl')
         );
     }
@@ -414,15 +423,9 @@ class VWM{
             this.selectedResolution = 9;
             this.currentArea[this.selectedResolution] = featureId;
             this.currentArea[10] = null;
-            this.setHash();
         }
 
         this.updateNavigation();
-            
-        /*this.getH3Layer();
-        if(this.selectedResolution == 9)
-            this.getMaskLayer('./geo/obf/' + this.currentArea[this.selectedResolution] +'.geojson', this.currentArea[this.selectedResolution], this.selectedResolution);
-        //this.setView(featureId, null);*/
     }
     focusObf(featureId){
         if(featureId == 0){
@@ -431,7 +434,6 @@ class VWM{
         }else{
             this.selectedResolution = 10;
             this.currentArea[this.selectedResolution] = featureId
-            this.setHash();
         }
 
         this.updateNavigation();
@@ -441,13 +443,11 @@ class VWM{
         const response = await fetch(url, {
             method: 'GET',
             mode: 'cors',
-            //cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-            //credentials: 'same-origin', // include, *same-origin, omit
             headers: {
                 'Content-Type': 'application/json'
             }
         });
-        return response.json(); // parses JSON response into native JavaScript objects
+        return response.json();
     }
 }
 

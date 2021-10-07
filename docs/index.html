@@ -3,20 +3,29 @@
     <head>
         <meta charset="utf-8">
         <title>Verbiss und Schälprozent in Brandenburg</title>
-        <meta name="description" content="Verjüngungszustands- und Wildeinflussmonitoring">
+        <meta name="description" content="Verjüngungszustands- und Wildeinflussmonitoring Brandenburg">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="./dist/bundle.iife.css" rel="stylesheet">
         <link rel="manifest" href="manifest.json">
         <meta name="theme-color" content="#00613A">
-        <link rel="icon" href="./images/favicon/favicon-32x32.ico" type="image/x-icon">
 
+        <link rel="icon" sizes="32x32" href="./images/favicon/favicon-32x32.png" type="image/png">
+        <link rel="icon" sizes="16x16" href="./images/favicon/favicon-16x16.png" type="image/png">
+        <link rel="apple-touch-icon" href="./images/favicon/apple-touch-icon-180x180.png" sizes="180x180">
+
+        <meta property="og:type"          content="website" />
+		<meta property="og:title"         content="Verbiss und Schälprozent in Brandenburg" />
+		<meta property="og:description"   content="Verjüngungszustands- und Wildeinflussmonitoring Brandenburg" />
+		<meta property="og:image"         content="./images/open-graph-vwm-monitoring.jpg" />
+
+        <meta http-equiv="Content-Security-Policy" content="script-src 'unsafe-inline' 'self'; img-src 'self' https:// *.tile.openstreetmap.org">
     </head>
     <body class="ge-res-8">
         <section>
             <div id="ge-sidebar">
                 <div class="ge-side-header">
                     <a id="ge-logo-wrapper" href="https://forst.brandenburg.de/lfb/de/ueber-uns/landeskompetenzzentrum-lfe/wildschaeden-erfassen-und-vorbeugen/" target="blank">
-                        <img src="images/LFB Logo lang PNG.png" title="Logo Landesbetrieb Forst Brandenburg" alt="Logo Landesbetrieb Forst Brandenburg"/>
+                        <img height="75" src="images/LFB Logo lang PNG.png" title="Logo Landesbetrieb Forst Brandenburg" alt="Logo Landesbetrieb Forst Brandenburg"/>
                     </a>
                     <!--
                         <div id="ge-description">
@@ -24,8 +33,8 @@
                         </div>
                     -->
                     <div id="ge-layer-control" class="ge-row even">
-                        <button type="button" class="ge-full-btn ge-grow" id="ge-layer-verbiss">Verbiss</button>
-                        <button type="button" class="ge-full-btn ge-grow" id="ge-layer-schaele">Schäle</button>
+                        <button type="button" class="ge-full-btn ge-grow" id="ge-layer-verbiss">Verbissprozent</button>
+                        <button type="button" class="ge-full-btn ge-grow" id="ge-layer-schaele">Schälprozent</button>
                     </div>
                     <div id="ge-area-info"></div>
                 </div>
@@ -42,9 +51,9 @@
                 </div>
                 <div class="ge-side-content ge-grow" id="ge-area-list-wrapper"></div>
                 <div class="ge-side-footer">
-                    <a href="https://forst.brandenburg.de/lfb/de/impressum/" target="_blank">Impressum</a>
-                    <a href="https://forst.brandenburg.de/lfb/de/datenschutz/" target="_blank">Datenschutz</a>
-                    <a href="http://www.openstreetmap.org/copyright/" target="_blank">
+                    <a href="https://forst.brandenburg.de/lfb/de/impressum/" target="_blank" rel="noreferrer">Impressum</a>
+                    <a href="https://forst.brandenburg.de/lfb/de/datenschutz/" target="_blank" rel="noreferrer">Datenschutz</a>
+                    <a href="http://www.openstreetmap.org/copyright/" target="_blank" rel="noreferrer">
                         © OpenStreetMap contributors
                     </a>
                 </div>
@@ -68,7 +77,9 @@
             document.getElementById('ge-layer-schaele').classList.remove("active");
             obj.changeLayer('ivus_verbiss')
         })
+        obj.changeLayer('ivus_verbiss')
         document.getElementById('ge-layer-verbiss').classList.add("active");
+        
         document.getElementById('ge-layer-schaele').addEventListener('click', () => {
             document.getElementById('ge-layer-schaele').classList.add("active");
             document.getElementById('ge-layer-verbiss').classList.remove("active");

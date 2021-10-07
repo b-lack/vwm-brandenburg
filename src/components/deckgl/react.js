@@ -1,12 +1,8 @@
-import React, {useState, useCallback, useEffect} from 'react';
-//import {render} from 'react-dom';
-//import {StaticMap} from 'react-map-gl';
-import {WebMercatorViewport, FlyToInterpolator} from '@deck.gl/core';
-//import {HexagonLayer} from '@deck.gl/aggregation-layers';
+import React, {useState, useEffect} from 'react';
+import {FlyToInterpolator} from '@deck.gl/core';
 import DeckGL from '@deck.gl/react';
 import {TileLayer, H3HexagonLayer} from '@deck.gl/geo-layers';
 import {BitmapLayer, GeoJsonLayer} from '@deck.gl/layers';
-//import * as turf from '@turf/turf';
 import {bboxPolygon, difference, bbox as turfbbox, centroid as turfcentroid} from '@turf/turf';
 
 
@@ -48,17 +44,18 @@ function perc2color(perc) {
 	}
 	var h = r * 0x10000 + g * 0x100 + b * 0x1;
   return [r,g,b];
-	return '#' + ('000000' + h.toString(16)).slice(-6);
 }
 
-function getTooltip({object}) {
-  if (!object) {
+function getTooltip({object}, layer) {
+  if (!object || !layer) {
     return null;
   }
   var value = Math.round(object.val).toString();
 
+
+
   return `\
-    Schälprozent ${value} %`;
+    ${layer=='ivus_schaele'?'Schälprozent':'Verbissprozent'} ${value} %`;
 }
 
 /* eslint-disable react/no-deprecated */
@@ -69,6 +66,7 @@ export default function ReactApp({
   parent,
   show3D,
   resolution,
+  layer,
   radius = 1000,
   upperPercentile = 100,
   coverage = 1
@@ -108,19 +106,19 @@ export default function ReactApp({
                 })
             ];
         }
-      }),
-      new GeoJsonLayer({
-        id: 'mask-layer-0_8',
-        data: polyMask(maskData),
-        getFillColor: [251,251,251,255],
-        stroked: false,
-        extruded: false,
-        wireframe: true,
-        lineJointRounded: true,
-      }),
-
+      })
   ];
-  if(childMaskData){
+  if(maskData){
+    layers.push(new GeoJsonLayer({
+      id: 'mask-layer-0_8',
+      data: polyMask(maskData),
+      getFillColor: [251,251,251,255],
+      stroked: false,
+      extruded: false,
+      wireframe: true,
+      lineJointRounded: true,
+    }))
+    if(childMaskData){
       layers.push(new GeoJsonLayer({
         id: 'child-mask-layer-0_8',
         data: polyMask(childMaskData),
@@ -129,8 +127,8 @@ export default function ReactApp({
         extruded: false,
         wireframe: true,
         lineJointRounded: true
-      })
-    )
+      }))
+    }
   }
   layers.push(
     new H3HexagonLayer({
@@ -142,7 +140,7 @@ export default function ReactApp({
       extruded: true,
       elevationScale: 25,
       coverage: 0.9,
-      visible: true, //this.h3Resolutions[layerId],
+      visible: true,
       getHexagon: d =>  d.hex || d.hex10,
       getFillColor: d => [...perc2color(100-d.val), 150], //[( d.val / 100) * 157, (1 - d.val / 100) * 255, 157, 150],
       getElevation: d => show3D ? d.val : 0,
@@ -182,8 +180,8 @@ export default function ReactApp({
   }
   const onViewStateChange = (e) => {
 
-    //setZoom(e.viewState.zoom);
-    
+    if(!maskData) return e.viewState;
+
     var bbox = turfbbox(maskData);
 
     if (e.viewState.latitude > bbox[3]) {
@@ -202,16 +200,22 @@ export default function ReactApp({
 
     parent(e)
   
-    // update mapbox
     return e.viewState;
   }
   useEffect(()=>{
 
-    if(!childMaskData) return;
-    var centroid = turfcentroid(childMaskData);
+    var centroid;
+
+    if(!childMaskData && maskData){
+      centroid = turfcentroid(maskData);
+    }else if(childMaskData){
+      centroid = turfcentroid(childMaskData);
+    }else{
+      return;
+    }
+    
 
     setInitialViewState({
-      //{...INITIAL_VIEW_STATE},
       longitude: centroid.geometry.coordinates[0],
       latitude: centroid.geometry.coordinates[1],
       zoom: resolution == 8 ? 7 : resolution == 9 ? 9 : 10,
@@ -231,7 +235,7 @@ export default function ReactApp({
       controller={true}
       onViewStateChange={onViewStateChange}
       onDragEnd={onDrag}
-      getTooltip={getTooltip}
+      getTooltip={(e) => getTooltip(e, layer)}
     >
       
     </DeckGL>

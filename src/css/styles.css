@@ -47,7 +47,7 @@ label{
     font-size: 0.8em;
     padding: 5px;
     border-top: 1px solid #aaa;
-    color: #aaa;
+    color: #555;
 }
 .ge-side-footer a{
     color: inherit;
@@ -74,7 +74,7 @@ section > *{flex-grow: 2;min-height: 300px;position: relative;}
 .ge-full-btn{
     border: none;
     display: block;
-    padding: 5px 10px;
+    padding: 10px 15px;
     background: #fefefe;
     color: #333;
     cursor: pointer;
@@ -131,13 +131,15 @@ section > *{flex-grow: 2;min-height: 300px;position: relative;}
     font-size: 0.9em;
 }
 .ge-subheader{
-    color: #888;
+    color: #555;
     font-size: 00.8em;
     margin: 10px 5px 5px;
 }
 @media (max-width: 600px) {
     #ge-layer-control{
         position: relative;
+        top:auto;
+        right: auto;
     }
     #ge-sidebar{
         height: auto;
@@ -179,7 +181,7 @@ section > *{flex-grow: 2;min-height: 300px;position: relative;}
     .ge-side-footer{
         position: fixed;
         bottom: 0;
-        width: 100100vw;
+        width: 100vw;
         background-color: white;
         border: none;
         box-shadow: 0 0 2px #666;

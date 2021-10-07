@@ -1,15 +1,18 @@
-var CACHE_NAME = 'vwm-v8';
+var CACHE_NAME = 'vwm-v13';
 var urlsToCache = [
   './manifest.json',
   './',
-  './app.js',
   './dist/bundle.iife.css',
   './dist/bundle.iife.js',
   './dist/bundle.iife.js.map',
-  './images/192x192.png',
-  './images/512x512.png',
-  './data/',
-  './images/LFB Logo lang PNG.png'
+  './images/favicon/favicon-32x32.png',
+  './images/favicon/favicon-16x16.png',
+  './images/favicon/apple-touch-icon-180x180.png',
+  './images/icons/192x192.png',
+  './images/icons/512x512.png',
+  './images/LFB Logo lang PNG.png',
+  './interpolation/2021/ivus_schaele/8/fid_undefined_8.json',
+  './interpolation/2021/ivus_verbiss/8/fid_undefined_8.json'
 ];
 
 self.addEventListener('install', function(event) {
@@ -17,7 +20,6 @@ self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
-        console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
   );
@@ -25,11 +27,9 @@ self.addEventListener('install', function(event) {
 self.addEventListener('fetch', (e) => {
   e.respondWith((async () => {
     const r = await caches.match(e.request);
-    console.log(`[Service Worker] Fetching resource: ${e.request.url}`);
     if (r) { return r; }
     const response = await fetch(e.request);
     const cache = await caches.open(CACHE_NAME);
-    console.log(`[Service Worker] Caching new resource: ${e.request.url}`);
     cache.put(e.request, response.clone());
     return response;
   })());

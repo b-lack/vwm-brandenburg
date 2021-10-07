@@ -3,7 +3,6 @@ import json from '@rollup/plugin-json'
 import pkg from './package.json'
 import { terser } from "rollup-plugin-terser";
 import css from "rollup-plugin-import-css";
-import jsx from 'rollup-plugin-jsx'
 import commonjs from '@rollup/plugin-commonjs'
 import babel from '@rollup/plugin-babel'
 import replace from 'rollup-plugin-replace';
@@ -25,31 +24,25 @@ export default [
         ],
         plugins: [
             babel({
-                //plugins: ['transform-class-properties'],
-                //exclude: 'node_modules/**',
                 presets: ["@babel/preset-react"],
                 babelHelpers: 'bundled'
             }),
             css(),
-            //jsx( {factory: 'React.createElement'} ),
-            terser(),
-            
             resolve({
                 browser: true
             }),
-            
-            
             replace({
-                'process.env.NODE_ENV': JSON.stringify( 'development' )
+                'process.env.NODE_ENV': JSON.stringify( 'production' )
             }),
             commonjs(),
             json({
                 compact: true,
             }),
             serve({
-                contentBase: 'example',
+                contentBase: 'docs',
                 open: true
             }),
+            terser()
         ]
     }
 ];
