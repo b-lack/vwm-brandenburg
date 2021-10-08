@@ -1,9 +1,8 @@
-//import Map from '../map/map'
-//import APP from '../react-map/map'
-import React, {useState, useCallback} from 'react';
-import ReactApp from '../deckgl/react'
-
+import React from 'react';
 import ReactDOM from 'react-dom';
+
+import { getInfo } from './dashboard';
+import ReactApp from '../deckgl/react'
 
 //import Map from '../deckgl/map'
 import * as obfObfDd from '../../geo-resolution/obf.json';
@@ -31,25 +30,8 @@ class VWM{
             10: null
         };
 
-        //const validHash = this.getHash();
-        //this.toOverview(validHash);
         this.getHash();
-    }
-    toOverview(validHash){
-
-        this.selectedResolution = 8;
-        
-        //this.updateNavigation();
-
-        //this.getMaskLayer('./geo/land.geojson', 0, this.selectedResolution);
-
-        //if(validHash) return;
-        
-        //this.currentArea[this.selectedResolution] = 'undefined';
-
-        
-        //this.getH3Layer('./interpolation/' + this.selectedYear + '/' + this.selectedLayer + '/' +this.selectedResolution+ '/fid_' + this.currentArea[this.selectedResolution] + '_' +this.selectedResolution+ '.json', 'global', this.selectedResolution);
-
+        this.getMaskLayer('./geo/land.geojson', 0, 8);
     }
     getHash(){
         if(window.location.hash) {
@@ -87,8 +69,6 @@ class VWM{
         this.selectedLayer = newLayer;
 
         this.updateNavigation();
-        //this.getH3Layer();
-        //this.getH3Layer('./interpolation/' + this.selectedYear + '/' + this.selectedLayer + '/' +this.selectedResolution+ '/fid_' + this.currentArea[this.selectedResolution] + '_' +this.selectedResolution+ '.json', 'global', this.selectedResolution);
 
     }
     updateDropDowns(){
@@ -190,6 +170,7 @@ class VWM{
             infoLine.append(obfClose);
 
             infoWindow.append(infoLine);
+            infoWindow.append(getInfo(filteredObfArea[0]))
         }
 
         if(filteredRevierArea.length > 0){
@@ -205,6 +186,7 @@ class VWM{
             infoLine.append(obfClose);
             
             infoWindow.append(infoLine);
+            infoWindow.append(getInfo(filteredRevierArea[0]))
         }
         
         if(filteredObfArea.length ==0){
@@ -212,7 +194,7 @@ class VWM{
             subHeader.classList.add('ge-subheader');
             subHeader.innerText = 'Wähle eine Oberförsterei';
             infoWindow.append(subHeader);
-        }else{
+        }else if(filteredRevierArea == 0){
             const subHeader = document.createElement('DIV');
             subHeader.classList.add('ge-subheader');
             subHeader.innerText = 'Wähle ein Revier';
@@ -223,8 +205,11 @@ class VWM{
     }
     removeLayer(resolution){
         if(resolution && this.currentArea[resolution]){
+            
+            if(resolution == 9) this.currentArea[10] = null;
             this.currentArea[resolution] = null;
             this.selectedResolution = resolution-1;
+
             this.updateNavigation();
         }
     }
@@ -247,12 +232,12 @@ class VWM{
             document.body.classList.remove('ge-res-10', 'ge-res-9');
         }
 
-
         this.getH3Layer();
         if(this.selectedResolution !== 8)
             this.getMaskLayer('./geo/' + (this.selectedResolution == 9 ? 'obf' : 'reviere') + '/' + this.currentArea[this.selectedResolution] +'.geojson', this.currentArea[this.selectedResolution], this.selectedResolution);
-        else
-            this.getMaskLayer('./geo/land.geojson', 0, this.selectedResolution);
+        else{
+            this.getMaskLayer('./geo/land.geojson', 0, 8);
+        }
     }
     checkMobileNavigation(){
         document.getElementById('ge-mobile-navigation')
@@ -263,11 +248,14 @@ class VWM{
         this.updateAreaList();
     }
     updateAreaList(){
+
         if(!this.areaList) return;
 
         document.getElementById(this.areaList).innerHTML = '';
 
-        if(this.currentArea[9]){
+        if(this.currentArea[10]){
+            return;
+        }if(this.currentArea[9]){
             document.getElementById(this.areaList).append(this.getReviereList(this.currentArea[9]));
         } else if(this.currentArea[8]){
             document.getElementById(this.areaList).append(this.getObfList());

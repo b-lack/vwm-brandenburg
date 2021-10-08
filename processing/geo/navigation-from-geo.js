@@ -43,19 +43,40 @@ if (!fs.existsSync(DESTINATION)){
 const rawdata = fs.readFileSync(FEATURCOLLECTIONFILE);
 const featureCollection = JSON.parse(rawdata);
 
-let OBFLIST = [];
+let OUTPUTLIST = [];
+
+function aggregation(fid, year, directory, resolution){
+
+    const OUTPUTDIRECTORY = __dirname + '/../../docs/interpolation/' + year + '/' + directory + '/' + resolution + '/';
+
+    let valuesStr = fs.readFileSync(OUTPUTDIRECTORY + 'fid_' + fid + '_' + resolution + '.json');
+    let valuesArray = JSON.parse(valuesStr);
+    let value = 0;
+    for(var i of valuesArray){
+        value += i.val;
+    }
+
+    return Math.round(value/valuesArray.length * 100) / 100;
+}
 
 for(var feature of featureCollection.features){
-    OBFLIST.push({
+    let obj = {
         id: feature.properties.fid,
         name: feature.properties.name,
-        obf: parseInt(feature.properties.obf)
-    });
+        obf: parseInt(feature.properties.obf),
+        agg:{
+            '2021':{
+                ivus_schaele: aggregation(feature.properties.fid, '2021', 'ivus_schaele', OUTPUTNAME == 'reviere' ? 10 : 9),
+                ivus_verbiss: aggregation(feature.properties.fid, '2021', 'ivus_verbiss', OUTPUTNAME == 'reviere' ? 10 : 9)
+            }
+        }
+    };
+    OUTPUTLIST.push(obj);
 }
 
 var saveTo = DESTINATION + OUTPUTNAME + '.json';
-console.log(saveTo, OBFLIST);
-fs.writeFileSync(saveTo, JSON.stringify(OBFLIST), function (err) {
+
+fs.writeFileSync(saveTo, JSON.stringify(OUTPUTLIST), function (err) {
     if (err) return console.log(err);
     console.log('written file:',  saveTo);
 });

@@ -4,14 +4,7 @@ import DeckGL from '@deck.gl/react';
 import {TileLayer, H3HexagonLayer} from '@deck.gl/geo-layers';
 import {BitmapLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {bboxPolygon, difference, bbox as turfbbox, centroid as turfcentroid} from '@turf/turf';
-
-
-const material = {
-  ambient: 0.64,
-  diffuse: 0.6,
-  shininess: 32,
-  specularColor: [51, 51, 51]
-};
+import { getRange } from '../bb/dashboard';
 
 const INITIAL_VIEW_STATE = {
     latitude: 52.459028, 
@@ -23,14 +16,6 @@ const INITIAL_VIEW_STATE = {
     bearing: 0
 };
 
-export const colorRange = [
-  [1, 152, 189],
-  [73, 227, 206],
-  [216, 254, 181],
-  [254, 237, 177],
-  [254, 173, 84],
-  [209, 55, 78]
-];
 
 function perc2color(perc) {
 	var r, g, b = 0;
@@ -52,7 +37,25 @@ function getTooltip({object}, layer) {
   }
   var value = Math.round(object.val).toString();
 
+  var toolTip = document.getElementsByClassName('deck-tooltip');
+  if(toolTip.length>0){
+    var geToolTip = toolTip[0].getElementsByClassName('ge-info-range-indicator')
+    if(geToolTip.length> 0){
+      geToolTip[0].style.left = Math.max(0, Math.min(100, object.val)) + '%';
+      toolTip[0].getElementsByClassName('ge-tooltip-value')[0].innerText = value.toString();
+      toolTip[0].getElementsByClassName('ge-tooltip-label')[0].innerText = layer == 'ivus_schaele'?'Schälprozent':'Verbissprozent';
+      return {
+        "style": {}
+      };
+    }
+  }
 
+  return {
+    'html': `
+      <div class="ge-tool-tip"><span class="ge-tooltip-label">${layer=='ivus_schaele'?'Schälprozent':'Verbissprozent'}</span> <span class="ge-tooltip-value">${value}</span>% 
+      <br/>${getRange(value).outerHTML}</div>
+      `
+  }
 
   return `\
     ${layer=='ivus_schaele'?'Schälprozent':'Verbissprozent'} ${value} %`;
@@ -138,7 +141,8 @@ export default function ReactApp({
       wireframe: false,
       filled: true,
       extruded: true,
-      elevationScale: 25,
+      elevationRange: [0, 3000],
+      elevationScale: 30,
       coverage: 0.9,
       visible: true,
       getHexagon: d =>  d.hex || d.hex10,
@@ -150,39 +154,26 @@ export default function ReactApp({
           ]
       },
       transitions: {
-          elevationScale: 3000
+        getElevation: 600,
+        getFillColor: 600
       }
     })
   );
-
-  /*layers.push(
-    new HexagonLayer({
-      id: 'heatmap',
-      colorRange,
-      coverage,
-      data,
-      elevationRange: [0, 3000],
-      elevationScale: data && data.length ? 50 : 0,
-      extruded: true,
-      getPosition: d => d,
-      pickable: true,
-      radius,
-      upperPercentile,
-      material,
-      transitions: {
-          elevationScale: 3000
-      }
-    })
-  );*/
   const onDrag = (info, e) =>{
     if(info.viewport)
       setZoom(info.viewport.zoom);
   }
   const onViewStateChange = (e) => {
 
-    if(!maskData) return e.viewState;
 
-    var bbox = turfbbox(maskData);
+    e.viewState.bearing = 0;
+
+    var bbox = [
+      11.265772516621665,
+      51.35900807904211,
+      14.76570064949395,
+      53.5590504652457
+    ];
 
     if (e.viewState.latitude > bbox[3]) {
       e.viewState.latitude = bbox[3];
@@ -195,8 +186,6 @@ export default function ReactApp({
     }else if (e.viewState.longitude < bbox[0]) {
       e.viewState.longitude = bbox[0];
     }
-
-    e.viewState.bearing = 0;
 
     parent(e)
   

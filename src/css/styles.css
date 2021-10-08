@@ -6,6 +6,9 @@ body {
 *{
     box-sizing: border-box;
 }
+#ge-map{
+    flex: 2;
+}
 #ge-map, #ge-canvas{
     overflow: hidden;
     height: 100vh !important;
@@ -31,7 +34,7 @@ label{
     color: #666;
 }
 #ge-sidebar{
-    max-width: 300px;
+    flex: 0 250px;
     display:flex;
     align-items: stretch;
     flex-direction: column;
@@ -78,7 +81,7 @@ section > *{flex-grow: 2;min-height: 300px;position: relative;}
     background: #fefefe;
     color: #333;
     cursor: pointer;
-    border: 1px solid #333;
+    box-shadow: 0 0 2px #666;
 }
 .ge-full-btn.active{
     background: #44754b;
@@ -90,12 +93,10 @@ section > *{flex-grow: 2;min-height: 300px;position: relative;}
     color: #fff;
 }
 .ge-info-window .ge-selection{
-    border-bottom: 1px solid #253f29;
+    border-top: 5px solid #44754b;
     padding: 10px;
     font-size: 1.2em;
     cursor: pointer;
-    background-color: #44754b;
-    color: #fff;
 }
 
 .ge-area-list > *{
@@ -124,7 +125,7 @@ section > *{flex-grow: 2;min-height: 300px;position: relative;}
     position: fixed;
     z-index: 100;
     top: 10px;
-    right: 10px;
+    left: 260px;
 }
 #ge-description{
     padding: 0 15px 10px;
@@ -135,11 +136,43 @@ section > *{flex-grow: 2;min-height: 300px;position: relative;}
     font-size: 00.8em;
     margin: 10px 5px 5px;
 }
+
+.ge-info-detail{
+    padding: 10px;
+}
+.ge-info-range{
+    height: 10px;
+    position: relative;
+    margin-top: 20px;
+}
+.ge-info-range-indicator{
+    position: absolute;
+    transition: left 1s ease;
+    left: 50%;
+    bottom: 98%;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+
+    border-top: 10px solid #333;
+    transform: translateX(-50%);
+}
+.ge-info-range .ge-info-range-qual1{
+    background-color: greenyellow;
+}
+.ge-info-range .ge-info-range-qual2{
+    background-color: green;
+}
+.ge-info-range .ge-info-range-qual3{
+    background-color: yellow;
+}
 @media (max-width: 600px) {
     #ge-layer-control{
         position: relative;
         top:auto;
         right: auto;
+        left: auto;
     }
     #ge-sidebar{
         height: auto;
@@ -219,4 +252,13 @@ section > *{flex-grow: 2;min-height: 300px;position: relative;}
     #ge-sidebar{
         overflow-y: scroll;
     }
+}
+
+.deck-tooltip{
+    background-color: #fefefe !important;
+    color: #333;
+    box-shadow: 0 0 5px rgba(0, 0, 0, .5)
+}
+.deck-tooltip .ge-tool-tip{
+    min-width: 100px;
 }

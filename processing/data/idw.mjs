@@ -9,7 +9,6 @@
  * 
 */
 
-import * as turf from '@turf/turf'
 import fs from 'fs';
 import * as h3 from 'h3-js'
 import minimist from 'minimist'
@@ -47,7 +46,7 @@ const __dirname = new URL('./', import.meta.url).pathname;
 var dataFileName = path.basename(DATAFILEPATH).split('.')[0];
 
 const SURVEYDIRECTORY = __dirname + '../tmp/resolutions_clean/' + RESOLUTION + '/';
-const OUTPUTDIRECTORY = __dirname + '../tmp/interpolation/' + YEAR + '/' + dataFileName + '/' + RESOLUTION + '/';
+const OUTPUTDIRECTORY = __dirname + '../../docs/interpolation/' + YEAR + '/' + dataFileName + '/' + RESOLUTION + '/';
 
 
 
@@ -80,7 +79,7 @@ function calcDist(p, q) {
 const survey_points = fs.readFileSync(DATAFILEPATH);
 const surveyPointsObj = JSON.parse(survey_points);
 
-
+let globalOutput = []
 
 function parseFile(file){
     // load h3 grid to fill
@@ -100,7 +99,7 @@ function parseFile(file){
         searchFor.val = calcVal({ x: hexCenterCoordinates[0], y: hexCenterCoordinates[1]}, surveyPointsObj, 2);
         output.push({
             hex: i,
-            val: searchFor.val
+            val: Math.round(searchFor.val*100)/100
         });
     }
     fs.writeFileSync(OUTPUTDIRECTORY + file, JSON.stringify(output), function (err) {
