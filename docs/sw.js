@@ -10,9 +10,9 @@ var urlsToCache = [
   './images/favicon/apple-touch-icon-180x180.png',
   './images/icons/192x192.png',
   './images/icons/512x512.png',
-  './images/LFB Logo lang PNG.png',
-  './interpolation/2021/ivus_schaele/8/fid_undefined_8.json',
-  './interpolation/2021/ivus_verbiss/8/fid_undefined_8.json'
+  './images/lfb_logo.gif',
+  './interpolation/2021/schaele/8/fid_undefined_8.json.gzip',
+  './interpolation/2021/verbiss/8/fid_undefined_8.json.gzip'
 ];
 
 self.addEventListener('install', function(event) {

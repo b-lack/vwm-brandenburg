@@ -1,11 +1,15 @@
 /**
- * node processing/data/idw.mjs --year 2021 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/ivus_schaele.json --resolution 8
- * node processing/data/idw.mjs --year 2021 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/ivus_schaele.json --resolution 9
- * node processing/data/idw.mjs --year 2021 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/ivus_schaele.json --resolution 10
+ * node processing/data/idw.mjs --year 2020 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/ivus_schaele.json --resolution 8 --outputDir=schaele
+ * node processing/data/idw.mjs --year 2020 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/ivus_schaele.json --resolution 9 --outputDir=schaele
+ * node processing/data/idw.mjs --year 2020 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/ivus_schaele.json --resolution 10 --outputDir=schaele
  * 
- * node processing/data/idw.mjs --year 2021 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/ivus_verbiss.json --resolution 8
- * node processing/data/idw.mjs --year 2021 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/ivus_verbiss.json --resolution 9
- * node processing/data/idw.mjs --year 2021 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/ivus_verbiss.json --resolution 10
+ * node processing/data/idw.mjs --year 2020 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/ivus_verbiss.json --resolution 8 --outputDir=verbiss
+ * node processing/data/idw.mjs --year 2020 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/ivus_verbiss.json --resolution 9 --outputDir=verbiss
+ * node processing/data/idw.mjs --year 2020 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/ivus_verbiss.json --resolution 10 --outputDir=verbiss
+ * 
+ * node processing/data/idw.mjs --year 2021 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/vwm_gesamt.json --resolution 8 --outputDir=verbiss
+ * node processing/data/idw.mjs --year 2021 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/vwm_gesamt.json --resolution 9 --outputDir=verbiss
+ * node processing/data/idw.mjs --year 2021 --dataFilePath /Users/b-mac/sites/lfb/vwm-brandenburg/processing/tmp/survey-data/vwm_gesamt.json --resolution 10 --outputDir=verbiss
  * 
 */
 
@@ -14,13 +18,21 @@ import * as h3 from 'h3-js'
 import minimist from 'minimist'
 import { URL } from 'url';
 import path from 'path'
+import pako from 'pako'
 
 var argv = minimist(process.argv.slice(2));
 
 let RESOLUTION;
 let YEAR;
 let DATAFILEPATH;
+let OUTPUTDIR
 
+if(typeof argv.outputDir === "undefined") {
+    console.warn('"--outputDir" attribute missing');
+    process.exit(1);
+}else{
+    OUTPUTDIR = argv.outputDir;
+}
 if(typeof argv.year === "undefined") {
     console.warn('"--YEAR" attribute missing');
     process.exit(1);
@@ -43,10 +55,10 @@ if(typeof argv.resolution === "undefined") {
 
 const __dirname = new URL('./', import.meta.url).pathname;
 
-var dataFileName = path.basename(DATAFILEPATH).split('.')[0];
+//var dataFileName = path.basename(DATAFILEPATH).split('.')[0];
 
 const SURVEYDIRECTORY = __dirname + '../tmp/resolutions_clean/' + RESOLUTION + '/';
-const OUTPUTDIRECTORY = __dirname + '../../docs/interpolation/' + YEAR + '/' + dataFileName + '/' + RESOLUTION + '/';
+const OUTPUTDIRECTORY = __dirname + '../../docs/interpolation/' + YEAR + '/' + OUTPUTDIR + '/' + RESOLUTION + '/';
 
 
 
@@ -102,10 +114,15 @@ function parseFile(file){
             val: Math.round(searchFor.val*100)/100
         });
     }
-    fs.writeFileSync(OUTPUTDIRECTORY + file, JSON.stringify(output), function (err) {
+
+    fs.writeFileSync(OUTPUTDIRECTORY + file + '.gzip', pako.deflate(JSON.stringify(output)), function (err) {
         if (err) return console.log(err);
         console.log('written file:',  OUTPUTDIRECTORY + file);
     });
+    /*fs.writeFileSync(OUTPUTDIRECTORY + file, JSON.stringify(output), function (err) {
+        if (err) return console.log(err);
+        console.log('written file:',  OUTPUTDIRECTORY + file);
+    });*/
 }
 
 function walkDir(files){

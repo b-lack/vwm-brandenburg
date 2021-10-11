@@ -1,6 +1,9 @@
 /**
  * node processing/data/translation_geojson.js --fileName /Users/b-mac/sites/lfb/vwm-translation/raw-data/ivus_verbiss.geojson --attributeName verbissproz_ob_drittel
  * node processing/data/translation_geojson.js --fileName /Users/b-mac/sites/lfb/vwm-translation/raw-data/ivus_schaele.geojson --attributeName Proz
+ * 
+ * node processing/data/translation_geojson.js --fileName /Users/b-mac/sites/lfb/vwm-translation/raw-data/vwm_gesamt.geojson --attributeName verbissen%
+ * node processing/data/translation_geojson.js --fileName /Users/b-mac/sites/lfb/vwm-translation/raw-data/vwm_gesamt.geojson --attributeName Proz
  */
 
 const csv = require('csv-parser');

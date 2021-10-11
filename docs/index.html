@@ -26,16 +26,22 @@
             <div id="ge-sidebar">
                 <div class="ge-side-header">
                     <a id="ge-logo-wrapper" href="https://forst.brandenburg.de/lfb/de/ueber-uns/landeskompetenzzentrum-lfe/wildschaeden-erfassen-und-vorbeugen/" target="blank">
-                        <img height="75" src="images/LFB Logo lang PNG.png" title="Logo Landesbetrieb Forst Brandenburg" alt="Logo Landesbetrieb Forst Brandenburg"/>
+                        <img width="180" height="75" src="images/lfb_logo.gif" title="Logo Landesbetrieb Forst Brandenburg" alt="Logo Landesbetrieb Forst Brandenburg"/>
                     </a>
                     <!--
                         <div id="ge-description">
                             Verjüngungszustands- und Wildeinflussmonitoring
                         </div>
                     -->
-                    <div id="ge-layer-control" class="ge-row even">
-                        <button type="button" class="ge-full-btn ge-grow" id="ge-layer-verbiss">Verbissprozent</button>
-                        <button type="button" class="ge-full-btn ge-grow" id="ge-layer-schaele">Schälprozent</button>
+                    <div id="ge-layer-control">
+                        <div class="ge-row even">
+                            <button type="button" class="ge-full-btn ge-grow" id="ge-year-2020">IVuS</button>
+                            <button type="button" class="ge-full-btn ge-grow" id="ge-year-2021">VWM</button>
+                        </div>
+                        <div class="ge-row even">
+                            <button type="button" class="ge-full-btn ge-grow" id="ge-layer-verbiss">Verbissprozent</button>
+                            <button type="button" class="ge-full-btn ge-grow" id="ge-layer-schaele">Schälprozent</button>
+                        </div>
                     </div>
                     <div id="ge-area-info"></div>
                 </div>
@@ -47,6 +53,7 @@
                         <div>
                             <div id="ge-revier-selection-wrapper"></div><a class="ge-close-btn" id="ge-remove-9">&#x2715;</a>
                         </div>
+                        <button type="button" class="ge-full-btn" id="ge-toggle-3D">3D</button>
                     </div>
                     <br/>
                 </div>
@@ -66,30 +73,4 @@
         
     </body>
     <script type="text/javascript" src="./dist/bundle.iife.js"></script>
-    <script type="text/javascript">
-        
-        var obj = new VWM();
-        obj.createObfDropdown('ge-obf-selection-wrapper', 'ge-revier-selection-wrapper');
-        obj.createAreaList('ge-area-list-wrapper');
-        obj.createAreaInfo('ge-area-info');
-        
-        document.getElementById('ge-layer-verbiss').addEventListener('click', (e) => {
-            document.getElementById('ge-layer-verbiss').classList.add("active");
-            document.getElementById('ge-layer-schaele').classList.remove("active");
-            obj.changeLayer('ivus_verbiss')
-        })
-        obj.changeLayer('ivus_verbiss')
-        document.getElementById('ge-layer-verbiss').classList.add("active");
-        
-        document.getElementById('ge-layer-schaele').addEventListener('click', () => {
-            document.getElementById('ge-layer-schaele').classList.add("active");
-            document.getElementById('ge-layer-verbiss').classList.remove("active");
-            obj.changeLayer('ivus_schaele')
-        })
-
-        document.getElementById('ge-remove-8').addEventListener('click', () => obj.removeLayer('9'));
-        document.getElementById('ge-remove-9').addEventListener('click', () => obj.removeLayer('10'));
-        
-       
-    </script>
 </html>

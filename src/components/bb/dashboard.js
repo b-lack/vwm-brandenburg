@@ -1,36 +1,44 @@
 
 function getInfo(data){
-    var wrapper = document.createElement('DIV')
+    const wrapper = document.createElement('DIV')
     wrapper.classList.add('ge-info-detail')
 
-    wrapper.append(dataRow('Schälprozent', data.agg['2021'].ivus_schaele + '%'))
-    wrapper.append(getRange(data.agg['2021'].ivus_schaele));
+    const wrapper1 = document.createElement('DIV')
 
-    wrapper.append(dataRow('Verbissprozent', data.agg['2021'].ivus_verbiss + '%'))
-    wrapper.append(getRange(data.agg['2021'].ivus_verbiss));
+    wrapper1.append(dataRow('Schälprozent', data.agg['2021'].ivus_schaele + '%'))
+    wrapper1.append(getRange(data.agg['2021'].ivus_schaele));
+
+    wrapper.append(wrapper1);
+
+    const wrapper2 = document.createElement('DIV')
+
+    wrapper2.append(dataRow('Verbissprozent', data.agg['2021'].ivus_verbiss + '%'))
+    wrapper2.append(getRange(data.agg['2021'].ivus_verbiss));
+
+    wrapper.append(wrapper2);
     
 
     return wrapper;
 }
 
 function getRange(percent){
-    var wrapper = document.createElement('DIV')
+    const wrapper = document.createElement('DIV')
     wrapper.classList.add('ge-info-range', 'ge-row', 'even')
 
-    var indicator = document.createElement('DIV')
+    const indicator = document.createElement('DIV')
     indicator.classList.add('ge-info-range-indicator')
     indicator.style.left = Math.max(0, Math.min(100, percent)) + '%';
     wrapper.append(indicator);
 
-    var qual1 = document.createElement('DIV')
+    const qual1 = document.createElement('DIV')
     qual1.classList.add('ge-info-range-qual1', 'ge-grow')
     wrapper.append(qual1);
 
-    var qual2 = document.createElement('DIV')
+    const qual2 = document.createElement('DIV')
     qual2.classList.add('ge-info-range-qual2', 'ge-grow')
     wrapper.append(qual2);
 
-    var qual3 = document.createElement('DIV')
+    const qual3 = document.createElement('DIV')
     qual3.classList.add('ge-info-range-qual3', 'ge-grow')
     wrapper.append(qual3);
 

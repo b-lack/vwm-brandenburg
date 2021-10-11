@@ -1,7 +1,7 @@
 /*
     example 
-    node processing/geo/navigation-from-geo.js --featureFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/oberfoerstereien.geojson --outputName obf --outputDir=/Users/b-mac/sites/lfb/vwm-brandenburg/src/geo-resolution/
-    node processing/geo/navigation-from-geo.js --featureFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/reviere.geojson --outputName reviere --outputDir=/Users/b-mac/sites/lfb/vwm-brandenburg/src/geo-resolution/
+    node processing/geo/navigation-from-geo.js --featureFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/oberfoerstereien.geojson --outputName obf --outputDir=/Users/b-mac/sites/lfb/vwm-brandenburg/src/geo-resolution/ --year=2020
+    node processing/geo/navigation-from-geo.js --featureFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/reviere.geojson --outputName reviere --outputDir=/Users/b-mac/sites/lfb/vwm-brandenburg/src/geo-resolution/ --year=2020
 */
 
 const proj4 = require('proj4')
@@ -15,6 +15,7 @@ var argv = require('minimist')(process.argv.slice(2));
 let FEATURCOLLECTIONFILE;
 let DESTINATION;
 let OUTPUTNAME;
+let YEAR;
 
 if(typeof argv.featureFile === "undefined") {
     console.warn('"--featureFile" attribute missing');  
@@ -34,7 +35,12 @@ if(typeof argv.outputName === "undefined") {
 }else{
     OUTPUTNAME = argv.outputName;
 }
-
+if(typeof argv.year === "undefined") {
+    console.warn('"--year" attribute missing');  
+    process.exit(1);
+}else{
+    YEAR = argv.year;
+}
 
 if (!fs.existsSync(DESTINATION)){
     fs.mkdirSync(DESTINATION, { recursive: true });
@@ -65,6 +71,10 @@ for(var feature of featureCollection.features){
         name: feature.properties.name,
         obf: parseInt(feature.properties.obf),
         agg:{
+            '2020':{
+                ivus_schaele: aggregation(feature.properties.fid, '2020', 'ivus_schaele', OUTPUTNAME == 'reviere' ? 10 : 9),
+                ivus_verbiss: aggregation(feature.properties.fid, '2020', 'ivus_verbiss', OUTPUTNAME == 'reviere' ? 10 : 9)
+            },
             '2021':{
                 ivus_schaele: aggregation(feature.properties.fid, '2021', 'ivus_schaele', OUTPUTNAME == 'reviere' ? 10 : 9),
                 ivus_verbiss: aggregation(feature.properties.fid, '2021', 'ivus_verbiss', OUTPUTNAME == 'reviere' ? 10 : 9)

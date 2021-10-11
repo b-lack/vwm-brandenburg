@@ -4,6 +4,8 @@ import ReactDOM from 'react-dom';
 import { getInfo } from './dashboard';
 import ReactApp from '../deckgl/react'
 
+import pako from 'pako'
+
 //import Map from '../deckgl/map'
 import * as obfObfDd from '../../geo-resolution/obf.json';
 import * as obfRevierDd from '../../geo-resolution/reviere.json';
@@ -19,10 +21,12 @@ class VWM{
         this.currentLayerKey = null;
         this.currentViewKey = '';
 
-        this.selectedYear = '2021';
+        this.selectedYear = null;
         this.selectedLayer = null;
         this.selectedResolution = 8;
         this.is3D = false;
+        this.deckPitch = 0;
+        this.cache = {}
 
         this.currentArea = {
             8: 'undefined',
@@ -59,11 +63,53 @@ class VWM{
         else
             window.location.hash = ''
     }
-    changeYear(newValue){
+    setPitch(value){
+        if(this.deckPitch===0){
+            this.deckPitch = value;
+        }else{
+            this.deckPitch = 0;
+        }
+        
+        this.is3D = this.deckPitch>0;
+        this.refreshReact();
+    }
+    pitchStart(event){
+        this.deckStartPitch = this.deckPitch;
+        let touchobj = event.changedTouches[0]; // erster Finger
+        //startx = parseInt(touchobj.clientX); // X/Y-Koordinaten relativ zum Viewport
+        this.touchStarty = parseInt(touchobj.clientY);
+
+        event.preventDefault();
+    }
+    pitchMove(event){
+        let touchobj = event.changedTouches[0];
+        let curTouchy = parseInt(touchobj.clientY);
+        const diff = (this.touchStarty - curTouchy)/3;
+        
+        this.deckPitch = Math.round(Math.max(0, Math.min(60, (diff + this.deckStartPitch))))
+        this.is3D = this.deckPitch>0
+        
+        event.preventDefault();
+
+        //this.refreshReact();
+        if(this.tout) return;
+        this.tout = setTimeout(() => {
+            this.tout = null;
+            this.refreshReact();
+        }, 100)
+    }
+    changeYear(newYear){
+        if(newYear == '2021' && this.selectedLayer == 'schaele') {
+            this.selectedLayer =  'verbiss'
+        }
         if(this.selectedYear==newYear) return;
-        this.selectedYear = newValue;
+        this.selectedYear = newYear;
+        this.updateNavigation();
     }
     changeLayer(newLayer){
+        if(this.selectedYear == '2021' && newLayer == 'schaele') {
+            this.selectedLayer = newLayer = 'verbiss'
+        }
         if(this.selectedLayer==newLayer) return;
         
         this.selectedLayer = newLayer;
@@ -166,7 +212,7 @@ class VWM{
             infoLine.append(obfName);
             let obfClose = document.createElement('DIV');
             obfClose.innerHTML = '&#x2715;';
-            obfClose.addEventListener('click', () => obj.removeLayer('9'));
+            obfClose.addEventListener('click', () => this.removeLayer('9'));
             infoLine.append(obfClose);
 
             infoWindow.append(infoLine);
@@ -182,7 +228,7 @@ class VWM{
             infoLine.append(obfName);
             let obfClose = document.createElement('DIV');
             obfClose.innerHTML = '&#x2715;';
-            obfClose.addEventListener('click', () => obj.removeLayer('10'));
+            obfClose.addEventListener('click', () => this.removeLayer('10'));
             infoLine.append(obfClose);
             
             infoWindow.append(infoLine);
@@ -370,14 +416,51 @@ class VWM{
             this.refreshReact();
         }).catch(e => console.error(e));
     }
+    thisLocalCash(selectedYear, selectedLayer, selectedResolution, currentArea){
+        if(!this.cache['h3']) this.cache['h3'] = {}
+        if(!this.cache['h3'][selectedYear]) this.cache['h3'][selectedYear] = {}
+        if(!this.cache['h3'][selectedYear][selectedLayer]) this.cache['h3'][selectedYear][selectedLayer] = {}
+        if(!this.cache['h3'][selectedYear][selectedLayer][selectedResolution]) this.cache['h3'][selectedYear][selectedLayer][selectedResolution] = {}
+        //if(!this.cache['h3'][selectedYear][selectedLayer][selectedResolution][currentArea]) this.cache['h3'][selectedYear][selectedLayer][selectedResolution][currentArea] = null
+        return this.cache['h3'][selectedYear][selectedLayer][selectedResolution][currentArea];
+    }
+    setLocalCache(set, selectedYear, selectedLayer, selectedResolution, currentArea){
+        this.cache['h3'][selectedYear][selectedLayer][selectedResolution][currentArea] = set;
+    }
+    unZipLayer(zipped){
+        const that = this;
+        var arrayBuffer;
+        var fileReader = new FileReader();
+        fileReader.onload = function() {
+            
+            arrayBuffer = this.result;
+            try {
+                let result = pako.ungzip(new Uint8Array(arrayBuffer), {"to": "string"});
+                let outlines = JSON.parse(result);
+                that.h3Layer = outlines;
+                that.refreshReact();
+            } catch (err) {
+                console.log("Error " + err);
+            }
+        };
+        fileReader.readAsArrayBuffer(zipped);
+    }
     getH3Layer(){
         if(!this.selectedYear || !this.selectedLayer || !this.selectedResolution) return;
+        const that = this;
+        var url = './interpolation/' + this.selectedYear + '/' + this.selectedLayer + '/' +this.selectedResolution+ '/fid_' + this.currentArea[this.selectedResolution] + '_' +this.selectedResolution+ '.json.gzip';
+        
+        let lCache = this.thisLocalCash(this.selectedYear, this.selectedLayer, this.selectedResolution, this.currentArea[this.selectedResolution]);
+        if(lCache) {
+            this.unZipLayer(lCache);
+            return;
+        }
 
-        var url = './interpolation/' + this.selectedYear + '/' + this.selectedLayer + '/' +this.selectedResolution+ '/fid_' + this.currentArea[this.selectedResolution] + '_' +this.selectedResolution+ '.json';
-       
-        this._loadJson(url).then(outlines => {
-            this.h3Layer = outlines;
-            this.refreshReact();
+        this._loadGzip(url).then(zipped => {
+            console.log('loaded', lCache, this.cache);
+            lCache = zipped;
+            this.setLocalCache(zipped, this.selectedYear, this.selectedLayer, this.selectedResolution, this.currentArea[this.selectedResolution]);
+            this.unZipLayer(zipped);
         }).catch(e => {
             console.log(e);
         }).catch(e => console.error(e));
@@ -393,11 +476,11 @@ class VWM{
         var that = this;
 
         if(!this.selectedLayer) return;
-        
+
         ReactDOM.render(
             <ReactApp data={this.h3Layer} maskData={this.maskLayer} childMaskData={this.childMaskLayer} parent={function(e){
                 that.changeView(e)
-            }} show3D={this.is3D} resolution={this.selectedResolution} layer={this.selectedLayer}/>,
+            }} show3D={this.is3D} pitch={this.deckPitch} resolution={this.selectedResolution} layer={this.selectedLayer}/>,
             document.getElementById('react-gl')
         );
     }
@@ -436,6 +519,16 @@ class VWM{
             }
         });
         return response.json();
+    }
+    async _loadGzip(url){
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.blob();
     }
 }
 

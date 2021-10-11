@@ -70,12 +70,13 @@ export default function ReactApp({
   show3D,
   resolution,
   layer,
-  radius = 1000,
-  upperPercentile = 100,
-  coverage = 1
+  pitch
 }) {
-
+    let currentPosition = [];
     let stateView = null;
+    let currentPitch = 0;
+    const [currpitch, setCurrpitch] = useState(INITIAL_VIEW_STATE.pitch)
+    const [position, setPosition] = useState({latitude: INITIAL_VIEW_STATE.latitude, longitude: INITIAL_VIEW_STATE.longitude})
     const [zoom, setZoom] = useState(INITIAL_VIEW_STATE.zoom)
     const [initialViewState, setInitialViewState] = useState(INITIAL_VIEW_STATE);
 
@@ -164,11 +165,10 @@ export default function ReactApp({
       setZoom(info.viewport.zoom);
   }
   const onViewStateChange = (e) => {
-
-
+    
     e.viewState.bearing = 0;
 
-    var bbox = [
+    const bbox = [
       11.265772516621665,
       51.35900807904211,
       14.76570064949395,
@@ -195,14 +195,12 @@ export default function ReactApp({
 
     var centroid;
 
+    
     if(!childMaskData && maskData){
       centroid = turfcentroid(maskData);
     }else if(childMaskData){
       centroid = turfcentroid(childMaskData);
-    }else{
-      return;
     }
-    
 
     setInitialViewState({
       longitude: centroid.geometry.coordinates[0],
@@ -210,12 +208,13 @@ export default function ReactApp({
       zoom: resolution == 8 ? 7 : resolution == 9 ? 9 : 10,
       minZoom: 7,
       maxZoom: 14,
-      pitch: 0,
+      pitch: pitch,
       bearing: 0,
       transitionDuration: 1000,
       transitionInterpolator: new FlyToInterpolator()
     });
-  }, [childMaskData])
+    
+  }, [childMaskData, pitch])
 
   return (
     <DeckGL
