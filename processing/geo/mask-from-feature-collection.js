@@ -1,7 +1,7 @@
 /*
     example 
-    node processing/geo/mask-from-feature-collection.js --property fid --featureFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/oberfoerstereien.geojson --outputDir=/Users/b-mac/sites/lfb/vwm-brandenburg/example/geo/obf
-    node processing/geo/mask-from-feature-collection.js --property fid --featureFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/reviere.geojson --outputDir=/Users/b-mac/sites/lfb/vwm-brandenburg/example/geo/reviere
+    node processing/geo/mask-from-feature-collection.js --property fid --featureFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/oberfoerstereien.geojson --outputDir=/Users/b-mac/sites/lfb/vwm-brandenburg/docs/geo/obf
+    node processing/geo/mask-from-feature-collection.js --property fid --featureFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/reviere.geojson --outputDir=/Users/b-mac/sites/lfb/vwm-brandenburg/example/docs/reviere
 */
 
 const proj4 = require('proj4')
@@ -9,6 +9,7 @@ const h3 = require("h3-js");
 const csv = require('csv-parser');
 const fs = require('fs');
 const fsP = require('fs').promises;
+const pako = require('pako')
 
 var argv = require('minimist')(process.argv.slice(2));
 
@@ -63,6 +64,11 @@ for(var feature of featureCollection.features){
     //fs.writeFile(DESTINATION + '/' + sortReviereByObf[obf].obf + '.geojson', JSON.stringify(obfFeatureCollection));
     
     var saveTo = DESTINATION + '/' + feature.properties[PROPERTY] + '.geojson';
+    console.log(saveTo + '.gzip');
+    fs.writeFileSync(saveTo + '.gzip', pako.deflate(JSON.stringify(obfFeatureCollection)), function (err) {
+        if (err) return console.log(err);
+        console.log('written file:', saveTo);
+    });
     fs.writeFileSync(saveTo, JSON.stringify(obfFeatureCollection), function (err) {
         if (err) return console.log(err);
         console.log(saveTo);

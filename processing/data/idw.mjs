@@ -55,11 +55,12 @@ if(typeof argv.resolution === "undefined") {
 
 const __dirname = new URL('./', import.meta.url).pathname;
 
-//var dataFileName = path.basename(DATAFILEPATH).split('.')[0];
-
 const SURVEYDIRECTORY = __dirname + '../tmp/resolutions_clean/' + RESOLUTION + '/';
 const OUTPUTDIRECTORY = __dirname + '../../docs/interpolation/' + YEAR + '/' + OUTPUTDIR + '/' + RESOLUTION + '/';
 
+// TEMP
+const add_values = fs.readFileSync(__dirname + '../tmp/survey-data/species/tree_species' + RESOLUTION + '.json');
+const addValuesArr = JSON.parse(add_values);
 
 
 if (!fs.existsSync(OUTPUTDIRECTORY)){
@@ -111,7 +112,8 @@ function parseFile(file){
         searchFor.val = calcVal({ x: hexCenterCoordinates[0], y: hexCenterCoordinates[1]}, surveyPointsObj, 2);
         output.push({
             hex: i,
-            val: Math.round(searchFor.val*100)/100
+            val: Math.round(searchFor.val*100)/100,
+            species: addValuesArr[i] || {}
         });
     }
 
@@ -119,10 +121,10 @@ function parseFile(file){
         if (err) return console.log(err);
         console.log('written file:',  OUTPUTDIRECTORY + file);
     });
-    /*fs.writeFileSync(OUTPUTDIRECTORY + file, JSON.stringify(output), function (err) {
+    fs.writeFileSync(OUTPUTDIRECTORY + file, JSON.stringify(output), function (err) {
         if (err) return console.log(err);
         console.log('written file:',  OUTPUTDIRECTORY + file);
-    });*/
+    });
 }
 
 function walkDir(files){

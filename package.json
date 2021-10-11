@@ -38,6 +38,7 @@
     "@turf/interpolate": "^6.5.0",
     "@turf/turf": "^6.5.0",
     "babel-preset-stage-0": "^6.24.1",
+    "chart.js": "^3.5.1",
     "h3-js": "^3.7.2",
     "leaflet": "^1.7.1",
     "pako": "^2.0.4",

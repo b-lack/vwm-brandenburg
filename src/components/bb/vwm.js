@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { getInfo } from './dashboard';
+import { Dashboard } from './dashboard';
 import ReactApp from '../deckgl/react'
 
 import pako from 'pako'
@@ -189,7 +189,7 @@ class VWM{
 
         if(!this.infoElementId) return
 
-        document.getElementById(this.infoElementId).innerHTML = '';
+        //document.getElementById(this.infoElementId).innerHTML = '';
 
         if(this.currentArea[10]){
             filteredRevierArea = obfRevierDd.default.filter(elem => elem.id == this.currentArea[10])
@@ -200,12 +200,14 @@ class VWM{
             })
         }
 
+        const parent = document.getElementById(this.infoElementId);
+
         const infoWindow = document.createElement('DIV');
         infoWindow.classList.add('ge-info-window');
 
         if(filteredObfArea.length > 0){
     
-            let infoLine = document.createElement('DIV');
+            /*let infoLine = document.createElement('DIV');
             infoLine.classList.add('ge-row', 'ge-selection');
             let obfName = document.createElement('DIV');
             obfName.innerText = filteredObfArea[0].name;
@@ -215,13 +217,24 @@ class VWM{
             obfClose.addEventListener('click', () => this.removeLayer('9'));
             infoLine.append(obfClose);
 
-            infoWindow.append(infoLine);
-            infoWindow.append(getInfo(filteredObfArea[0]))
+            infoWindow.append(infoLine);*/
+
+            if(!this.obfInfo){
+                this.obfInfo = new Dashboard(() => this.removeLayer('9'));
+                parent.append(this.obfInfo.getWrapper());
+            }
+            this.obfInfo.updateInfo(filteredObfArea[0]);
+            this.obfInfo.show();
+        }else{
+            if(this.obfInfo){
+                this.obfInfo.hide();
+            }
+                
         }
 
         if(filteredRevierArea.length > 0){
 
-            let infoLine = document.createElement('DIV');
+            /*let infoLine = document.createElement('DIV');
             infoLine.classList.add('ge-row', 'ge-selection');
             let obfName = document.createElement('DIV');
             obfName.innerText = filteredRevierArea[0].name;
@@ -232,7 +245,19 @@ class VWM{
             infoLine.append(obfClose);
             
             infoWindow.append(infoLine);
-            infoWindow.append(getInfo(filteredRevierArea[0]))
+            infoWindow.append(getInfo(filteredRevierArea[0]))*/
+
+            if(!this.revierInfo){
+                this.revierInfo = new Dashboard(() => this.removeLayer('10'));
+                parent.append(this.revierInfo.getWrapper());
+            }
+            this.revierInfo.updateInfo(filteredRevierArea[0]);
+            this.revierInfo.show();
+        }else{
+            if(this.revierInfo){
+                this.revierInfo.hide();
+            }
+                
         }
         
         if(filteredObfArea.length ==0){
@@ -247,7 +272,7 @@ class VWM{
             infoWindow.append(subHeader);
         };
 
-        document.getElementById(this.infoElementId).append(infoWindow);
+        //document.getElementById(this.infoElementId).append(infoWindow);
     }
     removeLayer(resolution){
         if(resolution && this.currentArea[resolution]){
@@ -457,7 +482,6 @@ class VWM{
         }
 
         this._loadGzip(url).then(zipped => {
-            console.log('loaded', lCache, this.cache);
             lCache = zipped;
             this.setLocalCache(zipped, this.selectedYear, this.selectedLayer, this.selectedResolution, this.currentArea[this.selectedResolution]);
             this.unZipLayer(zipped);

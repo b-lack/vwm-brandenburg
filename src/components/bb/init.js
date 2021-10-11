@@ -62,5 +62,6 @@ document.onreadystatechange = () => {
                 obj.pitchMove(e);
             }
         });
+        setTimeout(() => document.getElementById('ge-loading-wrapper').innerHTML = '', 1000)
     }
 };

@@ -43,7 +43,7 @@
                             <button type="button" class="ge-full-btn ge-grow" id="ge-layer-schaele">Schälprozent</button>
                         </div>
                     </div>
-                    <div id="ge-area-info"></div>
+                    
                 </div>
                 <div id="ge-mobile-navigation" class="ge-side-content ge-grow">
                     <div class="ge-row">
@@ -57,7 +57,11 @@
                     </div>
                     <br/>
                 </div>
-                <div class="ge-side-content ge-grow" id="ge-area-list-wrapper"></div>
+
+                <div class="ge-side-content ge-grow">
+                    <div id="ge-area-info"></div>
+                    <div id="ge-area-list-wrapper"></div>
+                </div>
                 <div class="ge-side-footer">
                     <a href="https://forst.brandenburg.de/lfb/de/impressum/" target="_blank" rel="noreferrer">Impressum</a>
                     <a href="https://forst.brandenburg.de/lfb/de/datenschutz/" target="_blank" rel="noreferrer">Datenschutz</a>
@@ -67,6 +71,9 @@
                 </div>
             </div>
             <div id="ge-map">
+                <div id="ge-loading-wrapper" class="ge-loading-wrapper">
+                    <div class="loader"></div>
+                </div>
                 <div id="react-gl"></div>
             </div>
         </section>

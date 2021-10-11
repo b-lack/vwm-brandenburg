@@ -103,7 +103,9 @@ button.ge-full-btn[disabled]{
     font-size: 1.2em;
     cursor: pointer;
 }
-
+.ge-info-content{
+    margin: 10px;
+}
 .ge-area-list > *{
     border-bottom: 1px solid #ddd;
     padding: 10px;
@@ -125,6 +127,7 @@ button.ge-full-btn[disabled]{
 }
 #ge-logo-wrapper img{
     height: 75px;
+    width: auto;
 }
 #ge-layer-control{
     position: fixed;
@@ -180,7 +183,7 @@ button.ge-full-btn[disabled]{
     background-color: yellow;
 }
 .hidden{
-    display: none;
+    display: none !important;
 }
 #ge-toggle-3D{
     position: fixed;
@@ -288,3 +291,30 @@ button.ge-full-btn[disabled]{
 .deck-tooltip .ge-tool-tip{
     min-width: 100px;
 }
+
+.ge-loading-wrapper{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.loader {
+    border: 5px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 5px solid #44754b;
+    width: 50px;
+    height: 50px;
+    -webkit-animation: spin 2s linear infinite; /* Safari */
+    animation: spin 2s linear infinite;
+  }
+  
+  /* Safari */
+  @-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }

@@ -4,7 +4,7 @@ import DeckGL from '@deck.gl/react';
 import {TileLayer, H3HexagonLayer} from '@deck.gl/geo-layers';
 import {BitmapLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {bboxPolygon, difference, bbox as turfbbox, centroid as turfcentroid} from '@turf/turf';
-import { getRange } from '../bb/dashboard';
+import { getRange, treeSpecies } from '../bb/dashboard';
 
 const INITIAL_VIEW_STATE = {
     latitude: 52.459028, 
@@ -31,6 +31,7 @@ function perc2color(perc) {
   return [r,g,b];
 }
 
+let BARCHART = null;
 function getTooltip({object}, layer) {
   if (!object || !layer) {
     return null;
@@ -44,16 +45,37 @@ function getTooltip({object}, layer) {
       geToolTip[0].style.left = Math.max(0, Math.min(100, object.val)) + '%';
       toolTip[0].getElementsByClassName('ge-tooltip-value')[0].innerText = value.toString();
       toolTip[0].getElementsByClassName('ge-tooltip-label')[0].innerText = layer == 'ivus_schaele'?'Schälprozent':'Verbissprozent';
+
+      const canvas = document.getElementById('ge-tt-bar-chart');
+      console.log(object.species.data);
+      if(!object.species.data){
+        console.log(canvas);
+        canvas.classList.add('hidden');
+      }else{
+        canvas.classList.remove('hidden');
+      }
+      var data = object.species.data || [];
+      var label = object.species.label || [];
+      if(!BARCHART && canvas){
+        BARCHART = treeSpecies(data, label, canvas)
+      }else{
+        BARCHART.data.labels = label;
+        BARCHART.data.datasets.forEach((dataset) => {
+            dataset.data = data;
+        });
+        BARCHART.update();
+      }
       return {
         "style": {}
       };
     }
   }
+  
 
   return {
     'html': `
       <div class="ge-tool-tip"><span class="ge-tooltip-label">${layer=='ivus_schaele'?'Schälprozent':'Verbissprozent'}</span> <span class="ge-tooltip-value">${value}</span>% 
-      <br/>${getRange(value).outerHTML}</div>
+      <br/>${getRange(value).outerHTML}<div><canvas id="ge-tt-bar-chart" width="300" height="200"></canvas</div></div>
       `
   }
 
