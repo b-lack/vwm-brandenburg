@@ -106,6 +106,9 @@ button.ge-full-btn[disabled]{
 .ge-info-content{
     margin: 10px;
 }
+.ge-area-list{
+    border-top: 1px solid #ddd;
+}
 .ge-area-list > *{
     border-bottom: 1px solid #ddd;
     padding: 10px;

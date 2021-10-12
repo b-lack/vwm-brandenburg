@@ -91,6 +91,7 @@ function calcDist(p, q) {
 // load meassured data
 const survey_points = fs.readFileSync(DATAFILEPATH);
 const surveyPointsObj = JSON.parse(survey_points);
+const filesToChache = [];
 
 let globalOutput = []
 
@@ -121,10 +122,16 @@ function parseFile(file){
         if (err) return console.log(err);
         console.log('written file:',  OUTPUTDIRECTORY + file);
     });
-    fs.writeFileSync(OUTPUTDIRECTORY + file, JSON.stringify(output), function (err) {
+    filesToChache.push('./interpolation/' + YEAR + '/' + OUTPUTDIR + '/' + RESOLUTION + '/' + file + '.gzip');
+    
+    fs.writeFileSync(OUTPUTDIRECTORY + 'fileToCache.json', JSON.stringify(filesToChache), function (err) {
         if (err) return console.log(err);
         console.log('written file:',  OUTPUTDIRECTORY + file);
     });
+    /*fs.writeFileSync(OUTPUTDIRECTORY + file, JSON.stringify(output), function (err) {
+        if (err) return console.log(err);
+        console.log('written file:',  OUTPUTDIRECTORY + file);
+    });*/
 }
 
 function walkDir(files){
