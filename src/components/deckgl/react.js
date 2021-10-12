@@ -47,9 +47,7 @@ function getTooltip({object}, layer) {
       toolTip[0].getElementsByClassName('ge-tooltip-label')[0].innerText = layer == 'ivus_schaele'?'Schälprozent':'Verbissprozent';
 
       const canvas = document.getElementById('ge-tt-bar-chart');
-      console.log(object.species.data);
       if(!object.species.data){
-        console.log(canvas);
         canvas.classList.add('hidden');
       }else{
         canvas.classList.remove('hidden');
