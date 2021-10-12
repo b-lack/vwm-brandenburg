@@ -1,4 +1,4 @@
-var CACHE_NAME = 'vwm-v14';
+var CACHE_NAME = 'vwm-v15';
 
 var urlsToCache = [
   './manifest.json',

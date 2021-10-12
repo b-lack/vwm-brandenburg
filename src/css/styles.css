@@ -190,13 +190,19 @@ button.ge-full-btn[disabled]{
 }
 #ge-toggle-3D{
     position: fixed;
-    bottom: 50px;
+    bottom: 10px;
     right: 10px;
+    z-index: 100;
+    aspect-ratio: 1/1;
+    display: none;
 }
-#ge-toggle-3D.ge-is-mobile{
+.ge-is-mobile #ge-toggle-3D{
     display: block;
 }
 @media (max-width: 600px) {
+    #ge-toggle-3D{
+        bottom: 40px;
+    }
     .ge-full-btn{
         padding: 4px 15px;
     }
