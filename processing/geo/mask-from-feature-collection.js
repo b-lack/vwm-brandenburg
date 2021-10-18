@@ -1,14 +1,15 @@
-/*
-    example 
-    node processing/geo/mask-from-feature-collection.js --property fid --featureFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/oberfoerstereien.geojson --outputDir=/Users/b-mac/sites/lfb/vwm-brandenburg/docs/geo/obf
-    node processing/geo/mask-from-feature-collection.js --property fid --featureFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/reviere.geojson --outputDir=/Users/b-mac/sites/lfb/vwm-brandenburg/example/docs/reviere
-*/
+/**
+ * Splits FeatureCollection into multiple Features named by defined property.
+ * The resulting features are used as a mask.
+ * Saves files as zipped gzip.
+ * @param {string} property - Name of the property used as feature name and file name
+ * @param {string} featureFile - Input geojson FeatureCollection
+ * @param {string} outputDir - Output directory
+ */
 
-const proj4 = require('proj4')
-const h3 = require("h3-js");
-const csv = require('csv-parser');
+require('dotenv').config()
+
 const fs = require('fs');
-const fsP = require('fs').promises;
 const pako = require('pako')
 
 var argv = require('minimist')(process.argv.slice(2));
@@ -27,11 +28,17 @@ if(typeof argv.outputDir === "undefined") {
     console.warn('"--outputDir" attribute missing');  
     process.exit(1);
 }else{
-    DESTINATION = argv.outputDir;
+    DESTINATION = __dirname + '/../../docs/geo/' + argv.outputDir;
 }
 if(typeof argv.property === "undefined") {
-    console.warn('"--property" attribute missing');  
-    process.exit(1);
+    if(process.env.MASK_PROPERTY){
+        PROPERTY = process.env.MASK_PROPERTY
+        console.log(PROPERTY);
+    }else{
+        console.warn('"--property" attribute missing');  
+        process.exit(1);
+    }
+    
 }else{
     PROPERTY = argv.property;
 }
@@ -46,31 +53,31 @@ if (!fs.existsSync(DESTINATION)){
 const rawdata = fs.readFileSync(FEATURCOLLECTIONFILE);
 const featureCollection = JSON.parse(rawdata);
 
-let sortReviereByObf = {};
+if(!featureCollection.features){
+    console.warn('is not a Featurecollection');  
+    process.exit(1);
+}
 
-/*for(feature of featureCollection.features){
-    if(!sortReviereByObf[feature.properties.obf]) sortReviereByObf[feature.properties.obf] = [];
-    sortReviereByObf[feature.properties.obf].push(feature)
-}*/
+const savedList = [];
 
 for(var feature of featureCollection.features){
-    console.log(feature);
+    if(!feature.properties[PROPERTY]){
+        console.warn('property "' + PROPERTY + '" cannot be found in feature.');  
+        process.exit(1);
+    }
+
     var obfFeatureCollection = {
         "type": "FeatureCollection",
         "name": feature.properties[PROPERTY],
         "features": [feature]
     };
-
-    //fs.writeFile(DESTINATION + '/' + sortReviereByObf[obf].obf + '.geojson', JSON.stringify(obfFeatureCollection));
     
     var saveTo = DESTINATION + '/' + feature.properties[PROPERTY] + '.geojson';
-    console.log(saveTo + '.gzip');
-    fs.writeFileSync(saveTo + '.gzip', pako.deflate(JSON.stringify(obfFeatureCollection)), function (err) {
-        if (err) return console.log(err);
-        console.log('written file:', saveTo);
-    });
-    fs.writeFileSync(saveTo, JSON.stringify(obfFeatureCollection), function (err) {
-        if (err) return console.log(err);
-        console.log(saveTo);
-    });
+    savedList.push('./geo/' + feature.properties[PROPERTY] + '.geojson.gzip');
+
+    fs.writeFileSync(saveTo + '.gzip', pako.deflate(JSON.stringify(obfFeatureCollection)));
+    console.log('written file:', saveTo);
 }
+
+fs.writeFileSync(DESTINATION + '/all.json', JSON.stringify(savedList));
+console.log('written file:', DESTINATION + '/all.json');

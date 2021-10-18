@@ -6,7 +6,6 @@ import ReactApp from '../deckgl/react'
 
 import pako from 'pako'
 
-//import Map from '../deckgl/map'
 import * as obfObfDd from '../../geo-resolution/obf.json';
 import * as obfRevierDd from '../../geo-resolution/reviere.json';
 
@@ -35,7 +34,7 @@ class VWM{
         };
 
         this.getHash();
-        this.getMaskLayer('./geo/land.geojson', 0, 8);
+        this.getMaskLayer('./geo/land.geojson', 8);
     }
     getHash(){
         if(window.location.hash) {
@@ -305,9 +304,9 @@ class VWM{
 
         this.getH3Layer();
         if(this.selectedResolution !== 8)
-            this.getMaskLayer('./geo/' + (this.selectedResolution == 9 ? 'obf' : 'reviere') + '/' + this.currentArea[this.selectedResolution] +'.geojson', this.currentArea[this.selectedResolution], this.selectedResolution);
+            this.getMaskLayer('./geo/' + (this.selectedResolution == 9 ? 'obf' : 'reviere') + '/' + this.currentArea[this.selectedResolution] +'.geojson.gzip', this.selectedResolution, true);
         else{
-            this.getMaskLayer('./geo/land.geojson', 0, 8);
+            this.getMaskLayer('./geo/land.geojson', 8);
         }
     }
     checkMobileNavigation(){
@@ -428,18 +427,35 @@ class VWM{
             }
         }
     }
-    getMaskLayer(url, id, resolution){
-        this._loadJson(url).then(outlines => {
-            if(resolution==8){
-                this.maskLayer = outlines.features[0];
-                this.childMaskLayer = null;
-            }else{
-                this.focus = this.childMaskLayer !== outlines.features[0];
-                this.childMaskLayer = outlines.features[0];
-            }
-                
-            this.refreshReact();
-        }).catch(e => console.error(e));
+    getMaskLayer(url, resolution, isZipped = false){
+        const that = this;
+        if(isZipped){
+            this._loadGzip(url).then(zipped => {
+                //this.setLocalCache(url);
+                this.unZipLayer(zipped, (outlines) => {
+                    this.focus = this.childMaskLayer !== outlines.features[0];
+                    this.childMaskLayer = outlines.features[0];
+                    that.refreshReact();
+                });
+            }).catch(e => {
+                console.log(e);
+            }).catch(e => console.error(e));
+        }else{
+            this._loadJson(url).then(outlines => {
+                if(resolution==8){
+                    this.maskLayer = outlines.features[0];
+                    this.childMaskLayer = null;
+                }else{
+                    this.focus = this.childMaskLayer !== outlines.features[0];
+                    this.childMaskLayer = outlines.features[0];
+                }
+                    
+                this.refreshReact();
+            }).catch(e => console.error(e));
+        }
+    }
+    maskCache(){
+
     }
     thisLocalCash(selectedYear, selectedLayer, selectedResolution, currentArea){
         if(!this.cache['h3']) this.cache['h3'] = {}
@@ -452,7 +468,7 @@ class VWM{
     setLocalCache(set, selectedYear, selectedLayer, selectedResolution, currentArea){
         this.cache['h3'][selectedYear][selectedLayer][selectedResolution][currentArea] = set;
     }
-    unZipLayer(zipped){
+    unZipLayer(zipped, callback){
         const that = this;
         var arrayBuffer;
         var fileReader = new FileReader();
@@ -462,8 +478,7 @@ class VWM{
             try {
                 let result = pako.ungzip(new Uint8Array(arrayBuffer), {"to": "string"});
                 let outlines = JSON.parse(result);
-                that.h3Layer = outlines;
-                that.refreshReact();
+                callback(outlines);
             } catch (err) {
                 console.log("Error " + err);
             }
@@ -477,14 +492,20 @@ class VWM{
         
         let lCache = this.thisLocalCash(this.selectedYear, this.selectedLayer, this.selectedResolution, this.currentArea[this.selectedResolution]);
         if(lCache) {
-            this.unZipLayer(lCache);
+            this.unZipLayer(lCache, (outlines) => {
+                that.h3Layer = outlines;
+                that.refreshReact();
+            });
             return;
         }
 
         this._loadGzip(url).then(zipped => {
             lCache = zipped;
             this.setLocalCache(zipped, this.selectedYear, this.selectedLayer, this.selectedResolution, this.currentArea[this.selectedResolution]);
-            this.unZipLayer(zipped);
+            this.unZipLayer(zipped, (outlines) => {
+                that.h3Layer = outlines;
+                that.refreshReact();
+            });
         }).catch(e => {
             console.log(e);
         }).catch(e => console.error(e));

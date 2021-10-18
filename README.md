@@ -1,8 +1,6 @@
-
+# Wildlife impact monitoring Brandenburg
 
 ![VWM-brandenburg](https://b-lack.github.io/vwm-brandenburg/images/open-graph-vwm-monitoring.jpg)
-
-# Wildlife impact monitoring Brandenburg
 
 Illustration of regeneration condition and wildlife impact monitoring by [Brandenburg State Forestry Office](https://forst.brandenburg.de/).
 
@@ -54,12 +52,12 @@ This may take a little while.
 `mask-from-feature-collection.js` splits FeatureCollection into multiple Features named by defined property used as mask.
 
 ```bash
-node processing/geo/mask-from-feature-collection.js --property fid --featureFile /path/to/polygon/feature-collection.geojson --outputDir=/path/to/docs/geo/obf
+node processing/geo/mask-from-feature-collection.js --property fid --featureFile /path/to/polygon/feature-collection.geojson --outputDir=dirname
 ```
 
 - **property**: Name of the property used as feature name
 - **featureFile**: Input geojson FeatureCollection
-- **outputDir**: Output directory
+- **outputDir**: Output directory name in `./docs/geo/`
 
 ### Create H3 Grid
 

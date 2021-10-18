@@ -26,8 +26,9 @@ document.onreadystatechange = () => {
             document.getElementById('ge-year-2021').classList.add("active");
             document.getElementById('ge-year-2020').classList.remove("active");
 
-            //document.getElementById('ge-layer-schaele').classList.add("hidden");
             document.getElementById('ge-layer-schaele').setAttribute('disabled', 'disabled');
+            document.getElementById('ge-layer-verbiss').click();
+
             obj.changeYear('2021')
         })
         

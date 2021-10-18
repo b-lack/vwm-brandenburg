@@ -44,7 +44,7 @@ function getTooltip({object}, layer) {
     if(geToolTip.length> 0){
       geToolTip[0].style.left = Math.max(0, Math.min(100, object.val)) + '%';
       toolTip[0].getElementsByClassName('ge-tooltip-value')[0].innerText = value.toString();
-      toolTip[0].getElementsByClassName('ge-tooltip-label')[0].innerText = layer == 'ivus_schaele'?'Schälprozent':'Verbissprozent';
+      toolTip[0].getElementsByClassName('ge-tooltip-label')[0].innerText = layer == 'schaele'?'Schälprozent':'Verbissprozent';
 
       const canvas = document.getElementById('ge-tt-bar-chart');
       if(!object.species.data){
@@ -73,7 +73,7 @@ function getTooltip({object}, layer) {
   return {
     'html': `
       <div class="ge-tool-tip"><span class="ge-tooltip-label">${layer=='ivus_schaele'?'Schälprozent':'Verbissprozent'}</span> <span class="ge-tooltip-value">${value}</span>% 
-      <br/>${getRange(value).outerHTML}<div><canvas id="ge-tt-bar-chart" width="300" height="200"></canvas</div></div>
+      <br/>${getRange(value).outerHTML}<div><canvas id="ge-tt-bar-chart" class="hidden" width="300" height="200"></canvas</div></div>
       `
   }
 

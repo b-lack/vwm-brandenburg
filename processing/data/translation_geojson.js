@@ -6,9 +6,9 @@
  * node processing/data/translation_geojson.js --fileName /Users/b-mac/sites/lfb/vwm-translation/raw-data/vwm_gesamt.geojson --attributeName Proz
  */
 
-const csv = require('csv-parser');
+
+
 const fs = require('fs');
-const h3 = require("h3-js");
 const { exit } = require('process');
 const path = require('path');
 
@@ -31,7 +31,7 @@ var fileName = path.basename(FILEPATH).split('.')[0];
 
 let jsonOutput = [];
 
-function translateFeature(feature){ // feature
+function translateFeature(feature){
     const valObj = {
         x: feature.geometry.coordinates[1],
         y: feature.geometry.coordinates[0],
@@ -40,7 +40,6 @@ function translateFeature(feature){ // feature
     jsonOutput.push(valObj)
 }
 function writeFile(){
-    
     fs.writeFileSync(__dirname + '/../tmp/survey-data/' + fileName + '.json', JSON.stringify(jsonOutput), function (err) {
         if (err) return console.log(err);
         console.log('written file: ' + fileName + '.json');

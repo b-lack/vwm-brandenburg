@@ -1,14 +1,12 @@
-/*
-    example 
-    node processing/geo/navigation-from-geo.js --featureFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/oberfoerstereien.geojson --outputName obf --outputDir=/Users/b-mac/sites/lfb/vwm-brandenburg/src/geo-resolution/ --year=2020
-    node processing/geo/navigation-from-geo.js --featureFile /Users/b-mac/sites/lfb/vwm-translation/raw-data/geo/reviere.geojson --outputName reviere --outputDir=/Users/b-mac/sites/lfb/vwm-brandenburg/src/geo-resolution/ --year=2020
-*/
+/**
+ * Creates Navigation from FeatureCollection
+ * @param {string} featureFile - Input geojson FeatureCollection
+ * @param {string} outputDir - Output directory
+ * @param {string} outputName - Output filename
+ * @param year - Layer in navigation
+ */
 
-const proj4 = require('proj4')
-const h3 = require("h3-js");
-const csv = require('csv-parser');
 const fs = require('fs');
-const fsP = require('fs').promises;
 
 var argv = require('minimist')(process.argv.slice(2));
 

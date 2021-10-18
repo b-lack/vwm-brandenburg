@@ -17,7 +17,6 @@ import fs from 'fs';
 import * as h3 from 'h3-js'
 import minimist from 'minimist'
 import { URL } from 'url';
-import path from 'path'
 import pako from 'pako'
 
 var argv = minimist(process.argv.slice(2));
@@ -76,7 +75,7 @@ function calcVal(v, points, p) {
         top += points[i].val / Math.pow(dist, p);
         bot += 1 / Math.pow(dist, p);
     }
-    if (bot == 0) { //When the distance between point and sensor is 0 (the point IS the sensor) Gives black spots, so fix this   
+    if (bot == 0) {
         return top;
     } else {
         return (top / bot);
@@ -88,7 +87,6 @@ function calcDist(p, q) {
 }
 
 
-// load meassured data
 const survey_points = fs.readFileSync(DATAFILEPATH);
 const surveyPointsObj = JSON.parse(survey_points);
 const filesToChache = [];
@@ -96,7 +94,6 @@ const filesToChache = [];
 let globalOutput = []
 
 function parseFile(file){
-    // load h3 grid to fill
     const toFillPoints = fs.readFileSync(SURVEYDIRECTORY + file);
     const toFillPointsObj = JSON.parse(toFillPoints);
 
@@ -128,10 +125,6 @@ function parseFile(file){
         if (err) return console.log(err);
         console.log('written file:',  OUTPUTDIRECTORY + file);
     });
-    /*fs.writeFileSync(OUTPUTDIRECTORY + file, JSON.stringify(output), function (err) {
-        if (err) return console.log(err);
-        console.log('written file:',  OUTPUTDIRECTORY + file);
-    });*/
 }
 
 function walkDir(files){
