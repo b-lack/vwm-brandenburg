@@ -1,54 +1,106 @@
-# VWM-brandenburg
 
-Darstellung von Verjüngungszustands- und Wildeinflussmonitoring.
 
-## Usage
+![VWM-brandenburg](https://b-lack.github.io/vwm-brandenburg/images/open-graph-vwm-monitoring.jpg)
+
+# Wildlife impact monitoring Brandenburg
+
+Illustration of regeneration condition and wildlife impact monitoring by [Brandenburg State Forestry Office](https://forst.brandenburg.de/).
+
+See the [Demo](https://b-lack.github.io/vwm-brandenburg/) Application.
+
+## Requirements
+
+Ensure [node.js](https://nodejs.org/en/) is installed and the repository is cloned.
+
+## Installation
+
+Download and install dependencies defined in `package.json`:
 
 ```bash
-# install dependencies
 npm install
-# or
+```
+
+or
+
+```bash
 yarn
 ```
 
+## Usage
+
+### Development
+
+Running application in dev mode will bundle necessary features, starts a server and opens `docs/index.html` in the browser:
+
 ```bash
-# bundle and serve the app
 npm run dev
 ```
 
-Visit: [http://localhost:10001/](http://localhost:10001/)
+This may take a little while. If the browser does not open automatically, visit: [localhost:10001](http://localhost:10001)
+
+### Build
+
+Starts the build process of all necessary features ready for production.
 
 ```bash
 # bundle and build the app
 npm run build
 ```
 
-## Processing
+This may take a little while.
 
-### Data Processing
+## Geo Processing
 
-Projects given etrs coordinates to WGS84 and saves json file to `tmp/survey-data` folder.
-
-```bash
-node processing/data/translation.js
-```
-
-Creates H3 list for given geojson FeatureCollection and saves in `outputDir` folder.
+`mask-from-feature-collection.js` splits FeatureCollection into multiple Features named by defined property used as mask.
 
 ```bash
-node node processing/geo-json-feature-to-h3.js --featureFile /path/to/mask/featur-collection.geojson --outputDir reviere --propertyId fid --resolution 10
+node processing/geo/mask-from-feature-collection.js --property fid --featureFile /path/to/polygon/feature-collection.geojson --outputDir=/path/to/docs/geo/obf
 ```
+
+- **property**: Name of the property used as feature name
+- **featureFile**: Input geojson FeatureCollection
+- **outputDir**: Output directory
+
+### Create H3 Grid
+
+Creates list of H3 indexes bounded by geoJSON FeatureCollection and saves to `outputDir` folder.
 
 ```bash
-node processing/clean-by-forst.js --outputDir reviere --resolution 10
+node node processing/geo/geo-json-feature-to-h3.js --featureFile /path/to/mask/feature-collection.geojson --outputDir reviere --propertyId fid --resolution 10
 ```
 
-Calculates Inverse-Distance-Weighting from given coordinates/values and list of H3 indexes. Saves results in `tmp/interpolation` folder.
+- **featureFile**: GeoJSON FeatureCollection to be filled with H3 grid
+- **outputDir**: Where files to be saved `/tmp/{$outputDir}/{$resolution}/'`
+- **resolution**: According to the [Uber H3](https://github.com/uber/h3) resolution
+
+## Data Processing
+
+### Preparing Data from geoJSON
+
+Extrudes coordinates and given monitoring attribute from geoJSON feature and creates `.json` file in `tmp/survey-data` folder.
 
 ```bash
-node processing/idw.mjs --resolution 10
+node processing/data/translation_geojson.js --fileName /path/to/feature/with/monitored/attribute.geojson --attributeName Percentage
 ```
+
+- **fileName**: GeoJSON FeatureCollection with monitored data in properties
+- **attributeName**: Name of the property to be visualized
+
+### Interpolatinf Data to H3 Grid
+
+Calculates [Inverse-Distance-Weighting](https://github.com/NicolaiMogensen/Inverse-Distance-Weighting-JS/blob/master/idwJS.js) from given coordinates/values and outputs list of H3 indexes.
+
+```bash
+node processing/data/idw.mjs --year 2021 --dataFilePath /path/to/previously/created/file.json --resolution 10 --outputDir=verbiss
+```
+
+- **year**: GeoJSON FeatureCollection to be filled with H3 grid
+- **dataFilePath**: path to previously created json file
+- **outputDir**: Where files to be saved `/docs/interpolation/{$year}/{$outputDir}/{$resolution}/'`
+- **resolution**: According to the [Uber H3](https://github.com/uber/h3) resolution
+
 ## Credits
 
 Data provided by the Brandenburg State Forestry Office
+
 [Wildschäden erfassen und vorbeugen](https://forst.brandenburg.de/lfb/de/ueber-uns/landeskompetenzzentrum-lfe/wildschaeden-erfassen-und-vorbeugen/#)

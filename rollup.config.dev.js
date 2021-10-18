@@ -8,9 +8,6 @@ import babel from '@rollup/plugin-babel'
 import replace from 'rollup-plugin-replace';
 import serve from 'rollup-plugin-serve'
 
-
-
-const extensions = ['.js', '.jsx']
 export default [
     {
         input: 'src/index.js',
@@ -27,7 +24,9 @@ export default [
                 presets: ["@babel/preset-react"],
                 babelHelpers: 'bundled'
             }),
-            css(),
+            css({
+                minify: true
+            }),
             resolve({
                 browser: true
             }),
