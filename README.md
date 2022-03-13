@@ -102,3 +102,7 @@ node processing/data/idw.mjs --year 2021 --dataFilePath /path/to/previously/crea
 Data provided by the Brandenburg State Forestry Office
 
 [Wildschäden erfassen und vorbeugen](https://forst.brandenburg.de/lfb/de/ueber-uns/landeskompetenzzentrum-lfe/wildschaeden-erfassen-und-vorbeugen/#)
+
+## Video / Presentation
+
+This repository was presented at the "Fossgis2022" conference with a [live demo](https://media.ccc.de/v/fossgis2022-13988-ausschreibung-und-umsetzung-von-open-source-software-im-ffentlichen-dienst#t=2) (in German language).
