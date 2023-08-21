@@ -1,6 +1,6 @@
 # Wildlife impact monitoring Brandenburg
 
-![VWM-brandenburg](https://b-lack.github.io/vwm-brandenburg/images/open-graph-vwm-monitoring.jpg)
+![VWM-brandenburg](./docs/images/open-graph-vwm-monitoring.jpeg)
 
 Illustration of regeneration condition and wildlife impact monitoring by [Brandenburg State Forestry Office](https://forst.brandenburg.de/).
 
